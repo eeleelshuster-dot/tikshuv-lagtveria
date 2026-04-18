@@ -7,6 +7,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useContent } from "@/contexts/ContentContext";
 import { useIdleDisconnect } from "@/hooks/useIdleDisconnect";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type TicketStatus = "sent" | "in_progress" | "resolved" | "closed";
 
@@ -205,19 +216,19 @@ const AdminDashboard = () => {
   const handleAddNote = async () => {
     if (!selectedTicket || !newNote.trim()) return;
     setSavingNote(true);
-    await supabase.from("ticket_updates").insert({
+    const { data: newUpdate, error } = await supabase.from("ticket_updates").insert({
       ticket_id: selectedTicket.id,
       update_text: newNote.trim(),
       created_by: profile?.id,
-    } as any);
+    } as any).select().single();
 
-    setNewNote("");
-    const { data } = await supabase
-      .from("ticket_updates")
-      .select("id, update_text, created_at, created_by")
-      .eq("ticket_id", selectedTicket.id)
-      .order("created_at", { ascending: true });
-    setTicketUpdates((data as any[]) || []);
+    if (error) {
+      toast({ title: "שגיאה", description: "לא ניתן להוסיף הערה: " + error.message, variant: "destructive" });
+    } else if (newUpdate) {
+      setTicketUpdates((prev) => [...prev, newUpdate]);
+      setNewNote("");
+    }
+    
     setSavingNote(false);
   };
 
@@ -243,7 +254,6 @@ const AdminDashboard = () => {
 
   const handlePermanentDelete = async () => {
     if (!selectedTicket || !selectedTicket.is_archived) return;
-    if (!window.confirm("האם אתה בטוח שברצונך למחוק פנייה זו לצמיתות? פעולה זו תמחק גם את כל הקבצים המצורפים ואינה הפיכה.")) return;
     
     try {
       // Fetch attachments to delete them from storage
@@ -642,14 +652,31 @@ const AdminDashboard = () => {
                 )}
                 
                 {selectedTicket.is_archived && profile?.role === "creator" && (
-                  <Button 
-                    variant="destructive" 
-                    className="w-full font-rubik flex items-center justify-center gap-2"
-                    onClick={handlePermanentDelete}
-                  >
-                    <LucideIcons.Trash2 className="w-4 h-4" />
-                    מחיקה לצמיתות
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        className="w-full font-rubik flex items-center justify-center gap-2"
+                      >
+                        <LucideIcons.Trash2 className="w-4 h-4" />
+                        מחיקה לצמיתות
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="font-assistant">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-right font-rubik">האם אתה בטוח?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-right">
+                          פעולה זו תמחק את הפנייה לצמיתות, כולל כל הקבצים המצורפים אליה. פעולה זו אינה הפיכה.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex-row gap-2 sm:gap-2">
+                        <AlertDialogCancel className="mt-0">ביטול</AlertDialogCancel>
+                        <AlertDialogAction onClick={handlePermanentDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          מחק לצמיתות
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
             </div>

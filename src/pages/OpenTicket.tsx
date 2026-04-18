@@ -49,10 +49,12 @@ const OpenTicket = () => {
         if (!value.trim()) return "שדה חובה";
         if (!/^\d{5,9}$/.test(value)) return "תעודת זהות לא תקינה (5-9 ספרות)";
         return "";
-      case "phone":
+      case "phone": {
         if (!value.trim()) return "שדה חובה";
-        if (!/^0\d{8,9}$/.test(value)) return "מספר טלפון לא תקין";
+        const cleanPhone = value.replace(/-/g, '');
+        if (!/^0\d{8,9}$/.test(cleanPhone)) return "מספר טלפון לא תקין";
         return "";
+      }
       case "description":
         if (!value.trim()) return "שדה חובה";
         if (value.trim().length < 5) return "תיאור קצר מדי (לפחות 5 תווים)";
@@ -60,8 +62,15 @@ const OpenTicket = () => {
       case "file": {
         const f = currentFile ?? null;
         if (f) {
-          const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
-          if (!validTypes.includes(f.type)) return "סוג קובץ לא נתמך";
+          const validTypes = [
+            "image/jpeg", "image/png", "image/gif", "image/webp", 
+            "application/pdf", 
+            "application/msword", 
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ];
+          if (!validTypes.includes(f.type) && !f.name.endsWith('.doc') && !f.name.endsWith('.docx')) {
+             return "סוג קובץ לא נתמך. יש להעלות תמונה, PDF או קובץ Word";
+          }
           if (f.size > 10 * 1024 * 1024) return "גודל קובץ מקסימלי: 10MB";
         }
         return "";
@@ -117,15 +126,24 @@ const OpenTicket = () => {
     setSubmitting(true);
     const ticket = generateTicketNumber();
 
+    const escapeHtml = (unsafe: string) => {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
     try {
       // 1. Atomic insertion of ticket and history
       const { data: ticketData, error: ticketErr } = await supabase
         .rpc("submit_ticket_atomic", {
           p_ticket_number: ticket,
-          p_full_name: formData.fullName.trim(),
-          p_id_number: formData.idNumber.trim(),
-          p_phone: formData.phone.trim(),
-          p_description: formData.description.trim()
+          p_full_name: escapeHtml(formData.fullName.trim()),
+          p_id_number: escapeHtml(formData.idNumber.trim()),
+          p_phone: escapeHtml(formData.phone.replace(/-/g, '').trim()),
+          p_description: escapeHtml(formData.description.trim())
         });
 
       if (ticketErr) throw ticketErr;
@@ -215,7 +233,21 @@ const OpenTicket = () => {
             </div>
             <h2 className="font-rubik text-xl font-bold text-card-foreground mb-2">{content["msg_ticket_success_title"]}</h2>
             <p className="text-muted-foreground font-assistant mb-4">{content["msg_ticket_number_label"]}</p>
-            <p className="font-mono-ticket text-2xl font-bold text-primary mb-6">{ticketNumber}</p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="font-mono-ticket text-2xl font-bold text-primary">{ticketNumber}</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => {
+                  navigator.clipboard.writeText(ticketNumber);
+                  toast({ title: "הועתק", description: "מספר הפנייה הועתק ללוח" });
+                }}
+                title="העתק מספר פנייה"
+              >
+                <LucideIcons.Copy className="w-4 h-4 text-muted-foreground" />
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground mb-6">{content["msg_ticket_success_save_number"]}</p>
           </div>
           <Button asChild variant="ghost" className="mt-6 text-foreground/70 hover:text-foreground">
@@ -344,7 +376,7 @@ const OpenTicket = () => {
             <label className="block font-assistant font-semibold text-card-foreground text-sm mb-1.5">צירוף תמונה/קובץ</label>
             <input
               type="file"
-              accept="image/*,application/pdf"
+              accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
               className="w-full text-sm font-assistant file:ml-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:font-rubik file:font-medium file:cursor-pointer file:transition-all file:duration-150 hover:file:bg-primary-hover"
             />

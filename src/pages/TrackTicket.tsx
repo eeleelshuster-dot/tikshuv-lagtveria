@@ -49,17 +49,29 @@ const TrackTicket = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ticketInput.trim()) {
+    const inputToSearch = ticketInput.trim().toUpperCase();
+    
+    if (!inputToSearch) {
       setError(content["placeholder_ticket_number"] || "הזן מספר פנייה");
+      setTicket(null);
+      setSearched(false);
       return;
     }
+    
+    if (!inputToSearch.startsWith("TK-")) {
+      setError("מספר פנייה חייב להכיל קידומת TK- (לדוגמה: TK-651295)");
+      setTicket(null);
+      setSearched(false);
+      return;
+    }
+    
     setError("");
     setLoading(true);
 
     const { data: fullTicket, error: fetchErr } = await supabase
       .from("tickets")
       .select("id, ticket_number, status, created_at")
-      .eq("ticket_number", ticketInput.trim().toUpperCase())
+      .eq("ticket_number", inputToSearch)
       .single();
 
     if (fetchErr || !fullTicket) {

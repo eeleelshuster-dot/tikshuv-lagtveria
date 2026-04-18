@@ -61,6 +61,10 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newFullName.trim() || !newUsername.trim()) {
+      toast({ title: "שגיאה", description: "שם מלא ושם משתמש הם שדות חובה", variant: "destructive" });
+      return;
+    }
     if (newPassword.length < 6) {
       toast({ title: "שגיאה", description: "הסיסמה חייבת להכיל לפחות 6 תווים", variant: "destructive" });
       return;
@@ -142,6 +146,11 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
 
   const handleDeleteUser = async () => {
     if (!deleteUser) return;
+    if (session?.user?.id === deleteUser.id) {
+      toast({ title: "שגיאה", description: "לא ניתן למחוק את החשבון המחובר", variant: "destructive" });
+      setDeleteUser(null);
+      return;
+    }
     setIsDeleting(true);
     try {
       const { error } = await supabase.functions.invoke("delete-user", {
@@ -247,7 +256,14 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
                       <Button variant={p.active ? "secondary" : "default"} size="sm" onClick={() => toggleActive(p.id, p.active)} className="h-8 text-xs">
                         {p.active ? "השבת" : "הפעל"}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setDeleteUser(p)} title="מחיקת משתמש" className="h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setDeleteUser(p)} 
+                        title="מחיקת משתמש" 
+                        className="h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10"
+                        disabled={session?.user?.id === p.id}
+                      >
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>

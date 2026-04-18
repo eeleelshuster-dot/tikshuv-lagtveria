@@ -15,6 +15,28 @@ const AdminLogin = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(() => parseInt(localStorage.getItem('admin_login_fails') || '0'));
+  const [lockoutUntil, setLockoutUntil] = useState(() => parseInt(localStorage.getItem('admin_lockout_until') || '0'));
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (lockoutUntil > Date.now()) {
+      setLockoutRemaining(Math.ceil((lockoutUntil - Date.now()) / 1000));
+      interval = setInterval(() => {
+        const remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
+        if (remaining <= 0) {
+          setLockoutRemaining(0);
+          setFailedAttempts(0);
+          localStorage.removeItem('admin_login_fails');
+          localStorage.removeItem('admin_lockout_until');
+        } else {
+          setLockoutRemaining(remaining);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [lockoutUntil]);
 
   useEffect(() => {
     if (!authLoading && user && profile) {
@@ -43,6 +65,10 @@ const AdminLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutRemaining > 0) {
+      setError(`חשבון ננעל עקב ניסיונות מרובים. נסה שוב בעוד ${lockoutRemaining} שניות.`);
+      return;
+    }
     if (!username.trim() || !password.trim()) {
       setError("נא למלא את כל השדות");
       return;
@@ -53,7 +79,22 @@ const AdminLogin = () => {
     const { error: loginError } = await signIn(username.trim(), password);
     setLoading(false);
     if (loginError) {
-      setError(loginError);
+      const newFails = failedAttempts + 1;
+      setFailedAttempts(newFails);
+      localStorage.setItem('admin_login_fails', newFails.toString());
+      
+      if (newFails >= 5) {
+        const until = Date.now() + 5 * 60 * 1000; // 5 minutes
+        setLockoutUntil(until);
+        localStorage.setItem('admin_lockout_until', until.toString());
+        setError(`יותר מדי ניסיונות כושלים. החשבון ננעל ל-5 דקות.`);
+      } else {
+        setError(loginError);
+      }
+    } else {
+      setFailedAttempts(0);
+      localStorage.removeItem('admin_login_fails');
+      localStorage.removeItem('admin_lockout_until');
     }
   };
 
@@ -115,8 +156,8 @@ const AdminLogin = () => {
             </div>
           )}
 
-          <Button type="submit" variant="hero" size="xl" className={`w-full flex-row-reverse ${getStyle("btn_login")}`} disabled={loading}>
-            <span>{loading ? content["msg_logging_in"] : content["btn_login"]}</span>
+          <Button type="submit" variant="hero" size="xl" className={`w-full flex-row-reverse ${getStyle("btn_login")}`} disabled={loading || lockoutRemaining > 0}>
+            <span>{lockoutRemaining > 0 ? `ננעל (${lockoutRemaining}ש')` : loading ? content["msg_logging_in"] : content["btn_login"]}</span>
             {renderIcon(getContentProps("btn_login").icon, <LucideIcons.Lock className="mr-2" />)}
           </Button>
         </form>
