@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Deep navy background */
+    --background: 230 42% 17%;
+    --foreground: 0 0% 100%;
+
+    /* Cards - dark purple-navy blend */
+    --card: 240 45% 24%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 210 20% 96%;
+    --popover-foreground: 220 43% 11%;
+
+    /* Primary - flat teal */
+    --primary: 191 100% 21%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 191 100% 26%;
+    --primary-active: 191 100% 18%;
+
+    /* Secondary */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 220 43% 11%;
+
+    /* Muted */
+    --muted: 220 13% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - electric indigo */
+    --accent: 253 98% 51%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & inputs - lighter for visibility on dark cards */
+    --border: 240 30% 35%;
+    --input: 0 0% 100%;
+    --ring: 191 100% 21%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 230 42% 17%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 191 100% 21%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 253 98% 51%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 191 100% 21%;
+
+    /* Custom tokens */
+
+    --focus-ring-inner: 0 0 0 2px hsl(191, 100%, 21%);
+    --focus-ring-outer: 0 0 0 4px hsl(253, 98%, 51%);
+    --card-shadow: 0 4px 20px -2px hsla(253, 98%, 51%, 0.15), 0 0 40px -10px hsla(191, 100%, 21%, 0.08), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 8px 30px -2px hsla(253, 98%, 51%, 0.25), 0 0 50px -10px hsla(191, 100%, 21%, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    /* Improved multi-depth blurred gradient background */
+    --gradient-bg: linear-gradient(160deg, hsl(230, 42%, 12%) 0%, hsl(235, 50%, 18%) 25%, hsl(240, 42%, 22%) 50%, hsl(250, 55%, 17%) 75%, hsl(230, 42%, 12%) 100%);
+    --gradient-radial: 
+      radial-gradient(ellipse 1600px 900px at 75% 10%, hsla(253, 98%, 55%, 0.22), transparent 55%),
+      radial-gradient(ellipse 1000px 700px at 15% 85%, hsla(191, 100%, 25%, 0.18), transparent 50%),
+      radial-gradient(ellipse 700px 500px at 50% 50%, hsla(240, 60%, 32%, 0.12), transparent 60%),
+      radial-gradient(ellipse 400px 300px at 85% 75%, hsla(253, 80%, 40%, 0.08), transparent 60%);
+
+    /* Input text - #111827 */
+    --input-text: 222 39% 11%;
+
+    /* Status colors */
+    --status-sent: 210 40% 50%;
+    --status-in-progress: 38 92% 50%;
+    --status-resolved: 142 71% 40%;
+    --status-closed: 220 13% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
+    direction: rtl;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6, button {
+    font-family: 'Rubik', 'Assistant', system-ui, sans-serif;
+  }
+
+  .font-mono-ticket {
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .bg-gradient-main {
+    background: var(--gradient-bg);
+    position: relative;
+  }
+
+  .bg-gradient-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-radial);
+    backdrop-filter: blur(0px);
+    pointer-events: none;
+  }
+
+  .bg-gradient-main::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 600px 600px at 70% 25%, hsla(253, 98%, 55%, 0.09), transparent 65%),
+      radial-gradient(ellipse 500px 400px at 25% 70%, hsla(191, 100%, 35%, 0.08), transparent 60%),
+      radial-gradient(ellipse 350px 250px at 90% 80%, hsla(200, 80%, 40%, 0.05), transparent 70%);
+    filter: blur(50px);
+    pointer-events: none;
+  }
+
+  .focus-double-ring:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring-inner), var(--focus-ring-outer);
+  }
+
+  .card-hover {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--card-shadow-hover) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Darken input text for visibility */
+  input, textarea, select {
+    color: hsl(var(--input-text)) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: hsl(215 16% 55%) !important;
+  }
+}

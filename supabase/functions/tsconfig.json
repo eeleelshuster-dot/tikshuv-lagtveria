@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "module": "esnext"
+  }
+}
