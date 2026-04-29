@@ -12,7 +12,7 @@ test.describe("Creator Workflow", () => {
     // 2. Perform Login with the new account
     const usernameInput = page.locator('input[type="text"]');
     const passwordInput = page.locator('input[type="password"]');
-    const loginButton = page.getByRole("button", { name: /כניסה|Login|Sign In|כניסת מנהל/i });
+    const loginButton = page.locator('button[type="submit"]');
 
     await usernameInput.fill("eeleel shuster");
     await passwordInput.fill("Eeleel1810");

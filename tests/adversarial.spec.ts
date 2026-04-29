@@ -18,18 +18,18 @@ test.describe("Adversarial Bounds Validations", () => {
         await page.goto("/open-ticket");
         
         // Push form raw
-        await page.getByRole("button", { name: /שלח|Submit|Send/i }).click();
+        await page.locator('button[type="submit"]').click();
 
         // System should throw localized errors inside the UI boundaries, not crashing backend
         const errors = page.locator('.text-destructive');
         await expect(errors).not.toHaveCount(0); // Native async validation wait
         
-        // Try injecting massive string to ID
+        // Try injecting massive string to phone
         const hugeString = "A".repeat(10000);
-        await page.locator('input[type="text"]').nth(1).fill(hugeString);
-        await page.locator('input[type="text"]').nth(1).blur();
+        await page.locator('input[type="tel"]').fill(hugeString);
+        await page.locator('input[type="tel"]').blur();
 
-        // ID field complains due to regex \d{5,9} limitation
-        await expect(page.locator('.text-destructive').filter({ hasText: /5-9/ })).toBeVisible();
+        // Phone field complains
+        await expect(page.locator('.text-destructive').filter({ hasText: /מספר טלפון לא תקין/ })).toBeVisible();
     });
 });

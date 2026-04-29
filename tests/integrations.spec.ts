@@ -7,12 +7,12 @@ test.describe("Integration Workflows", () => {
 
         // 2. Fill Ticket Details
         await page.locator('input[type="text"]').nth(0).fill("ישראל ישראלי");
-        await page.locator('input[type="text"]').nth(1).fill("123456789");
+        await page.locator('select').selectOption('גיוס');
         await page.locator('input[type="tel"]').fill("0501234567");
         await page.locator('textarea').fill("פניית בדיקה באמצעות מערכת אוטומטית.");
 
         // 3. Submit Ticket
-        await page.getByRole("button", { name: /שלח|Submit|Send/i }).click();
+        await page.locator('button[type="submit"]').click();
 
         // 4. Verify Success Message
         // Based on OpenTicket.tsx: text comes from msg_ticket_success_title
