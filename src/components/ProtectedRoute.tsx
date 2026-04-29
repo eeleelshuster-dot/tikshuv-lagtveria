@@ -33,6 +33,10 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     return <Navigate to="/admin" replace />;
   }
 
+  if (!requiredRole && profile.role === "commander") {
+    return <Navigate to="/commander" replace />;
+  }
+
   return <>{children}</>;
 };
 

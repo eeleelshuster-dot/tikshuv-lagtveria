@@ -25,6 +25,7 @@ interface TicketResult {
   ticket_number: string;
   status: TicketStatus;
   created_at: string;
+  is_closed_confirmed: boolean;
   updates: { created_at: string; update_text: string }[];
 }
 
@@ -33,6 +34,7 @@ const TrackTicket = () => {
   const [ticketInput, setTicketInput] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
   const [ticket, setTicket] = useState<TicketResult | null>(null);
 
@@ -70,7 +72,7 @@ const TrackTicket = () => {
 
     const { data: fullTicket, error: fetchErr } = await supabase
       .from("tickets")
-      .select("id, ticket_number, status, created_at")
+      .select("id, ticket_number, status, created_at, is_closed_confirmed")
       .eq("ticket_number", inputToSearch)
       .single();
 
@@ -91,10 +93,28 @@ const TrackTicket = () => {
       ticket_number: (fullTicket as any).ticket_number,
       status: (fullTicket as any).status as TicketStatus,
       created_at: (fullTicket as any).created_at,
+      is_closed_confirmed: (fullTicket as any).is_closed_confirmed,
       updates: (updates as any[]) || [],
     });
     setSearched(true);
     setLoading(false);
+  };
+
+  const handleConfirmClosure = async () => {
+    if (!ticket) return;
+    setConfirming(true);
+    try {
+      const { error: confirmErr } = await supabase.rpc('confirm_ticket_closure_public', { 
+        p_ticket_number: ticket.ticket_number 
+      });
+      if (confirmErr) throw confirmErr;
+
+      setTicket(prev => prev ? { ...prev, is_closed_confirmed: true } : null);
+    } catch (err: any) {
+      setError(err.message || "אירעה שגיאה באישור סגירת הפנייה");
+    } finally {
+      setConfirming(false);
+    }
   };
 
   const formatDate = (iso: string) => {
@@ -160,6 +180,17 @@ const TrackTicket = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+                {ticket.status === 'closed' && !ticket.is_closed_confirmed && (
+                  <div className="mt-6 border-t border-border pt-4 text-center">
+                    <p className="text-sm font-assistant text-card-foreground mb-3 font-medium">
+                      פנייה זו נסגרה. האם הטיפול הושלם לשביעות רצונך?
+                    </p>
+                    <Button onClick={handleConfirmClosure} disabled={confirming} className="w-full sm:w-auto font-rubik flex items-center justify-center gap-2">
+                      <LucideIcons.CheckCircle className="w-4 h-4" />
+                      {confirming ? "מאשר..." : "אשר סגירת פנייה"}
+                    </Button>
                   </div>
                 )}
               </div>

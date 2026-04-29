@@ -18,6 +18,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { FilterPanel } from "@/components/FilterPanel";
+import { useSearchParams } from "react-router-dom";
+import { isSameDay } from "date-fns";
 
 type TicketStatus = "sent" | "in_progress" | "resolved" | "closed";
 
@@ -39,13 +42,15 @@ interface Ticket {
   id: string;
   ticket_number: string;
   full_name: string;
-  id_number: string;
+  department?: string;
   phone: string;
   description: string;
   status: TicketStatus;
   assignee_id: string | null;
   created_at: string;
   is_archived: boolean;
+  is_closed_confirmed?: boolean;
+  ticket_updates?: { created_at: string }[];
 }
 
 interface TicketUpdate {
@@ -66,8 +71,14 @@ const AdminDashboard = () => {
   const { profile, signOut } = useAuth();
   const { toast } = useToast();
   const { content, getContentProps } = useContent();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchQuery = searchParams.get("q") || "";
+  const statusFilter = searchParams.get("status") || "all";
+  const departmentFilter = searchParams.get("department") || "all";
+  const dateFilterStr = searchParams.get("date");
+  const dateFilter = dateFilterStr ? new Date(dateFilterStr) : undefined;
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchive, setShowArchive] = useState(false);
@@ -78,6 +89,27 @@ const AdminDashboard = () => {
   const [savingNote, setSavingNote] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
   const [savingAssignee, setSavingAssignee] = useState(false);
+
+  const setSearchQuery = (val: string) => updateParams("q", val);
+  const setStatusFilter = (val: string) => updateParams("status", val);
+  const setDepartmentFilter = (val: string) => updateParams("department", val);
+  const setDateFilter = (val: Date | undefined) => updateParams("date", val ? val.toISOString() : "");
+
+  const updateParams = (key: string, value: string) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== "all") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    }, { replace: true });
+  };
+
+  const clearFilters = () => {
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
 
   const renderIcon = (iconName: string | undefined, fallback: any) => {
     if (!iconName) return fallback;
@@ -93,7 +125,7 @@ const AdminDashboard = () => {
   const fetchTickets = async () => {
     const { data } = await supabase
       .from("tickets")
-      .select("id, ticket_number, full_name, id_number, phone, description, status, assignee_id, created_at, is_archived")
+      .select("id, ticket_number, full_name, department, phone, description, status, assignee_id, created_at, is_archived, is_closed_confirmed, ticket_updates(created_at)")
       .order("created_at", { ascending: false });
     setTickets((data as any[]) || []);
     setLoading(false);
@@ -284,9 +316,11 @@ const AdminDashboard = () => {
   };
 
   const filtered = tickets.filter((t) => {
-    const matchesSearch = !searchQuery || t.ticket_number.includes(searchQuery) || t.full_name.includes(searchQuery) || t.id_number.includes(searchQuery);
+    const matchesSearch = !searchQuery || t.ticket_number.includes(searchQuery) || t.full_name.includes(searchQuery);
     const matchesStatus = statusFilter === "all" || t.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesDept = departmentFilter === "all" || t.department === departmentFilter;
+    const matchesDate = !dateFilter || isSameDay(new Date(t.created_at), dateFilter) || (t.ticket_updates && t.ticket_updates.some((u: any) => isSameDay(new Date(u.created_at), dateFilter)));
+    return matchesSearch && matchesStatus && matchesDept && matchesDate;
   });
 
   const activeTickets = filtered.filter(t => !t.is_archived);
@@ -320,32 +354,13 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-card rounded-lg p-4 shadow-lg mb-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <LucideIcons.Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pr-10 pl-4 rounded-md border border-border bg-input font-assistant text-sm focus-double-ring transition-all duration-150"
-                placeholder={content["admin_dashboard_search_placeholder"]}
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-10 px-4 rounded-md border border-border bg-input font-assistant text-sm focus-double-ring transition-all duration-150"
-            >
-              <option value="all">{content["admin_dashboard_status_all"]}</option>
-              <option value="sent">נשלח</option>
-              <option value="in_progress">בטיפול</option>
-              <option value="resolved">טופל</option>
-              <option value="closed">הפנייה נסגרה</option>
-            </select>
-          </div>
-        </div>
+        <FilterPanel 
+          searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+          departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
+          dateFilter={dateFilter} setDateFilter={setDateFilter}
+          onClearFilters={clearFilters}
+        />
 
         {loading ? (
           <div className="bg-card rounded-lg p-8 shadow-lg text-center">
@@ -360,7 +375,7 @@ const AdminDashboard = () => {
                   <tr className="border-b border-border bg-secondary/50">
                     <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
                     <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">ת.ז.</th>
+                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
                     <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">תיאור</th>
                     <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
                     <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
@@ -375,7 +390,7 @@ const AdminDashboard = () => {
                     >
                       <td className="p-3 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
                       <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
-                      <td className="p-3 font-mono-ticket text-sm text-card-foreground">{ticket.id_number}</td>
+                      <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.department}</td>
                       <td className="p-3 font-assistant text-sm text-card-foreground max-w-[200px] truncate">{ticket.description}</td>
                       <td className="p-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-rubik font-medium ${statusStyles[ticket.status]}`}>
@@ -442,7 +457,7 @@ const AdminDashboard = () => {
                       <tr className="border-b border-border bg-secondary/50">
                         <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
                         <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
-                        <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">ת.ז.</th>
+                        <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
                         <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
                         <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
                       </tr>
@@ -456,7 +471,7 @@ const AdminDashboard = () => {
                         >
                           <td className="p-3 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
                           <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
-                          <td className="p-3 font-mono-ticket text-sm text-card-foreground">{ticket.id_number}</td>
+                          <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.department}</td>
                           <td className="p-3">
                             <span className="px-2.5 py-1 rounded-full text-xs font-rubik font-medium bg-muted text-muted-foreground border border-border">
                               ארכיון
@@ -532,8 +547,8 @@ const AdminDashboard = () => {
                     <span className="text-card-foreground font-assistant font-medium">{selectedTicket.full_name}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground font-assistant block">{content["label_id"]}</span>
-                    <span className="text-card-foreground font-mono-ticket">{selectedTicket.id_number}</span>
+                    <span className="text-muted-foreground font-assistant block">מדור</span>
+                    <span className="text-card-foreground font-assistant">{selectedTicket.department}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground font-assistant block">{content["label_phone"]}</span>
@@ -565,10 +580,17 @@ const AdminDashboard = () => {
                   className="w-full h-10 px-4 rounded-md border border-border bg-input font-assistant text-sm focus-double-ring transition-all duration-150"
                 >
                   <option value="sent">נשלח</option>
-                  <option value="in_progress">בטיפול</option>
+                  <option value="in_progress">בטיפול המדור</option>
+                  <option value="forwarded">הועבר לגורם הרלוונטי</option>
                   <option value="resolved">טופל</option>
                   <option value="closed">הפנייה נסגרה</option>
                 </select>
+                {selectedTicket.status === 'closed' && !selectedTicket.is_closed_confirmed && (
+                  <p className="text-xs text-amber-500 font-assistant mt-2 font-medium">
+                    <LucideIcons.AlertCircle className="w-3 h-3 inline mr-1" />
+                    הפנייה נסגרה אך עדיין ממתינה לאישור (ממתין לסגירת פנייה).
+                  </p>
+                )}
               </div>
 
               {/* Technician Assignment */}

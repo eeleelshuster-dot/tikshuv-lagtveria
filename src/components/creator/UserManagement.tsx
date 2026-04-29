@@ -200,6 +200,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
               <label className="block text-sm font-assistant font-medium mb-1">תפקיד</label>
               <select value={newRole} onChange={e => setNewRole(e.target.value)} className="w-full h-10 px-3 rounded border border-border bg-input font-assistant text-sm">
                 <option value="admin">מנהל</option>
+                <option value="commander">מפקד</option>
                 <option value="creator">יוצר (Creator)</option>
               </select>
             </div>
@@ -234,6 +235,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
                   <td className="p-3">
                     <select value={p.role} onChange={(e) => changeRole(p.id, e.target.value)} className="h-8 px-2 rounded border border-border bg-input font-assistant text-xs">
                       <option value="admin">מנהל</option>
+                      <option value="commander">מפקד</option>
                       <option value="creator">יוצר</option>
                     </select>
                   </td>

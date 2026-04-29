@@ -19,11 +19,10 @@ const OpenTicket = () => {
   const [ticketNumber, setTicketNumber] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
-    idNumber: "",
+    department: "",
     phone: "",
     description: "",
   });
-  const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -45,9 +44,8 @@ const OpenTicket = () => {
         if (!value.trim()) return "שדה חובה";
         if (value.trim().length < 2) return "שם קצר מדי";
         return "";
-      case "idNumber":
-        if (!value.trim()) return "שדה חובה";
-        if (!/^\d{5,9}$/.test(value)) return "תעודת זהות לא תקינה (5-9 ספרות)";
+      case "department":
+        if (!value) return "שדה חובה";
         return "";
       case "phone": {
         if (!value.trim()) return "שדה חובה";
@@ -59,22 +57,6 @@ const OpenTicket = () => {
         if (!value.trim()) return "שדה חובה";
         if (value.trim().length < 5) return "תיאור קצר מדי (לפחות 5 תווים)";
         return "";
-      case "file": {
-        const f = currentFile ?? null;
-        if (f) {
-          const validTypes = [
-            "image/jpeg", "image/png", "image/gif", "image/webp", 
-            "application/pdf", 
-            "application/msword", 
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          ];
-          if (!validTypes.includes(f.type) && !f.name.endsWith('.doc') && !f.name.endsWith('.docx')) {
-             return "סוג קובץ לא נתמך. יש להעלות תמונה, PDF או קובץ Word";
-          }
-          if (f.size > 10 * 1024 * 1024) return "גודל קובץ מקסימלי: 10MB";
-        }
-        return "";
-      }
       default:
         return "";
     }
@@ -95,14 +77,8 @@ const OpenTicket = () => {
     }));
   };
 
-  const handleFileChange = (f: File | null) => {
-    setFile(f);
-    setTouched((prev) => ({ ...prev, file: true }));
-    setErrors((prev) => ({ ...prev, file: validateField("file", "", f) }));
-  };
-
   const validateAll = () => {
-    const fields = ["fullName", "idNumber", "phone", "description"] as const;
+    const fields = ["fullName", "department", "phone", "description"] as const;
     const newErrors: Record<string, string> = {};
     const allTouched: Record<string, boolean> = {};
     fields.forEach((f) => {
@@ -110,9 +86,6 @@ const OpenTicket = () => {
       const err = validateField(f, formData[f]);
       if (err) newErrors[f] = err;
     });
-    const fileErr = validateField("file", "", file);
-    if (fileErr) newErrors.file = fileErr;
-    allTouched.file = true;
     setTouched(allTouched);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -141,30 +114,12 @@ const OpenTicket = () => {
         .rpc("submit_ticket_atomic", {
           p_ticket_number: ticket,
           p_full_name: escapeHtml(formData.fullName.trim()),
-          p_id_number: escapeHtml(formData.idNumber.trim()),
+          p_department: escapeHtml(formData.department.trim()),
           p_phone: escapeHtml(formData.phone.replace(/-/g, '').trim()),
           p_description: escapeHtml(formData.description.trim())
         });
 
       if (ticketErr) throw ticketErr;
-
-      // 2. Upload file if present (Now that initial payload is solid)
-      if (file && ticketData) {
-        const filePath = `${(ticketData as any).id}/${Date.now()}-${file.name}`;
-        const { error: uploadErr } = await supabase.storage
-          .from("ticket-attachments")
-          .upload(filePath, file);
-
-        if (!uploadErr) {
-          await supabase.from("ticket_attachments").insert({
-            ticket_id: (ticketData as any).id,
-            file_name: file.name,
-            file_path: filePath,
-            file_size: file.size,
-            content_type: file.type,
-          } as any);
-        }
-      }
 
       // Send Telegram notification (fire-and-forget)
       supabase.functions.invoke("notify-telegram", {
@@ -184,7 +139,7 @@ const OpenTicket = () => {
       if (msg.includes("RATE_LIMIT:DUPLICATE")) {
         desc = "פנייה זו כבר נשלחה למערכת. עקב למניעת כפילויות, אנא המתן.";
       } else if (msg.includes("RATE_LIMIT:IDENTITY")) {
-        desc = "פתחת לאחרונה פנייה עבור תעודת זהות או מספר טלפון זה. אנא המתן 5 דקות.";
+        desc = "פתחת לאחרונה פנייה עבור מספר טלפון זה. אנא המתן 5 דקות.";
       } else if (msg.includes("RATE_LIMIT:IP")) {
         desc = "נחסמת זמנית עקב ריבוי פניות. אנא המתן דקה.";
       } else {
@@ -298,27 +253,29 @@ const OpenTicket = () => {
             )}
           </div>
 
-          {/* ID Number */}
+          {/* Department */}
           <div>
-            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_id_number")}`}>
-              {content["label_id_number"]} *
+            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5`}>
+              מדור *
             </label>
             <div className="relative">
-              <input
-                type="text"
-                value={formData.idNumber}
-                onChange={(e) => handleChange("idNumber", e.target.value)}
-                onBlur={() => handleBlur("idNumber")}
-                className={fieldClass("idNumber")}
-                placeholder={content["placeholder_id_number"]}
-                inputMode="numeric"
-              />
-              {isFieldValid("idNumber") && <LucideIcons.CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />}
+              <select
+                value={formData.department}
+                onChange={(e) => handleChange("department", e.target.value)}
+                onBlur={() => handleBlur("department")}
+                className={fieldClass("department")}
+              >
+                <option value="" disabled>בחר מדור</option>
+                {['גיוס','תו״מ','בקרה','ברה״ן','רפואי','פסיכוטכני','פרט','חרדים','קהילה','שלוחת חזון','מל״ג / סמל״ג'].map((dept) => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+              {isFieldValid("department") && <LucideIcons.CheckCircle2 className="absolute left-10 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />}
             </div>
-            {touched.idNumber && errors.idNumber && (
+            {touched.department && errors.department && (
               <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
                 <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.idNumber}
+                {errors.department}
               </p>
             )}
           </div>
@@ -334,11 +291,11 @@ const OpenTicket = () => {
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 onBlur={() => handleBlur("phone")}
-                className={fieldClass("phone")}
+                className={`${fieldClass("phone")} pl-10`}
                 placeholder={content["placeholder_phone"]}
                 inputMode="tel"
               />
-              {isFieldValid("phone") && <LucideIcons.CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />}
+              {isFieldValid("phone") && <LucideIcons.CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none bg-input" />}
             </div>
             {touched.phone && errors.phone && (
               <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
@@ -371,22 +328,7 @@ const OpenTicket = () => {
             )}
           </div>
 
-          {/* File */}
-          <div>
-            <label className="block font-assistant font-semibold text-card-foreground text-sm mb-1.5">צירוף תמונה/קובץ</label>
-            <input
-              type="file"
-              accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
-              className="w-full text-sm font-assistant file:ml-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:font-rubik file:font-medium file:cursor-pointer file:transition-all file:duration-150 hover:file:bg-primary-hover"
-            />
-            {touched.file && errors.file && (
-              <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
-                <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.file}
-              </p>
-            )}
-          </div>
+
 
           <p className="text-xs text-muted-foreground font-assistant text-center py-2">
             המידע מוגן ולא יועבר לצד שלישי. משמש אך ורק לצורך טיפול בפנייה.

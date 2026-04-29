@@ -10,6 +10,7 @@ import OpenTicket from "./pages/OpenTicket";
 import TrackTicket from "./pages/TrackTicket";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import CommanderDashboard from "./pages/CommanderDashboard";
 import CreatorPanel from "./pages/CreatorPanel";
 import ChangePassword from "./pages/ChangePassword";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,11 @@ const App = () => (
                 <Route path="/admin" element={
                   <ProtectedRoute>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/commander" element={
+                  <ProtectedRoute requiredRole="commander">
+                    <CommanderDashboard />
                   </ProtectedRoute>
                 } />
                 <Route path="/creator" element={
