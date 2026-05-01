@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, UserX, Shield, Clock, Check, X, Key, Trash2, AlertTriangle } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import { formatError } from "@/utils/errorHandler";
 import PasswordInput from "@/components/PasswordInput";
 import {
   Dialog,
@@ -48,7 +49,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
     setLoading(true);
     const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) {
-      toast({ title: "שגיאה בטעינת משתמשים", description: error.message, variant: "destructive" });
+      toast({ title: "שגיאה בטעינת משתמשים", description: formatError(error), variant: "destructive" });
     } else {
       setProfiles(data || []);
     }
@@ -99,7 +100,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
       console.error("Create user error:", err);
       toast({
         title: "שגיאה ביצירת משתמש",
-        description: err.message || "שגיאה לא צפויה",
+        description: formatError(err),
         variant: "destructive"
       });
     }
@@ -108,7 +109,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
   const toggleActive = async (id: string, currentActive: boolean) => {
     const { error } = await supabase.from("profiles").update({ active: !currentActive }).eq("id", id);
     if (error) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      toast({ title: "שגיאה", description: formatError(error), variant: "destructive" });
     } else {
       setProfiles(prev => prev.map(p => p.id === id ? { ...p, active: !currentActive } : p));
       toast({ title: currentActive ? "משתמש הושבת" : "משתמש הופעל" });
@@ -119,7 +120,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
     const roleToSave = newRowRole as any;
     const { error } = await supabase.from("profiles").update({ role: roleToSave }).eq("id", id);
     if (error) {
-      toast({ title: "שגיאה", description: error.message, variant: "destructive" });
+      toast({ title: "שגיאה", description: formatError(error), variant: "destructive" });
     } else {
       setProfiles(prev => prev.map(p => p.id === id ? { ...p, role: newRowRole } : p));
       toast({ title: "תפקיד שונה בהצלחה" });
@@ -138,7 +139,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
       setResetUser(null);
       setResetPasswordValue("");
     } catch (err: any) {
-      toast({ title: "שגיאה בשינוי סיסמה", description: err.message, variant: "destructive" });
+      toast({ title: "שגיאה בשינוי סיסמה", description: formatError(err), variant: "destructive" });
     } finally {
       setIsResetting(false);
     }
@@ -161,7 +162,7 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
       setProfiles(prev => prev.filter(p => p.id !== deleteUser.id));
       setDeleteUser(null);
     } catch (err: any) {
-      toast({ title: "שגיאה במחיקת משתמש", description: err.message, variant: "destructive" });
+      toast({ title: "שגיאה במחיקת משתמש", description: formatError(err), variant: "destructive" });
     } finally {
       setIsDeleting(false);
     }
@@ -229,17 +230,17 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
             <tbody>
               {profiles.map(p => (
                 <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                  <td className="p-3 font-assistant text-sm">{p.full_name}</td>
-                  <td className="p-3 font-assistant text-sm text-primary">{p.username}</td>
-                  <td className="p-3 font-mono text-xs text-muted-foreground">{p.email}</td>
-                  <td className="p-3">
+                  <td className="p-3 py-4 font-assistant text-sm">{p.full_name}</td>
+                  <td className="p-3 py-4 font-assistant text-sm text-primary">{p.username}</td>
+                  <td className="p-3 py-4 font-mono text-xs text-muted-foreground">{p.email}</td>
+                  <td className="p-3 py-4">
                     <select value={p.role} onChange={(e) => changeRole(p.id, e.target.value)} className="h-8 px-2 rounded border border-border bg-input font-assistant text-xs">
                       <option value="admin">מנהל</option>
                       <option value="commander">מפקד</option>
                       <option value="creator">יוצר</option>
                     </select>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 py-4">
                     {p.active ? (
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-500/10 text-green-600 rounded-full font-medium">
                         <Check className="w-3 h-3" /> פעיל
@@ -250,10 +251,10 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
                       </span>
                     )}
                   </td>
-                  <td className="p-3">
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setResetUser(p)} title="שינוי סיסמה" className="h-8 w-8 p-0">
-                        <Key className="w-3 h-3 text-muted-foreground" />
+                  <td className="p-3 py-4 text-left">
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" size="sm" onClick={() => setResetUser(p)} title="שינוי סיסמה" className="h-8 flex items-center">
+                        <Key className="w-3 h-3 text-muted-foreground ml-1.5" /> איפוס סיסמה
                       </Button>
                       <Button variant={p.active ? "secondary" : "default"} size="sm" onClick={() => toggleActive(p.id, p.active)} className="h-8 text-xs">
                         {p.active ? "השבת" : "הפעל"}
@@ -263,10 +264,10 @@ export const UserManagement = ({ session }: { session: Session | null }) => {
                         size="sm" 
                         onClick={() => setDeleteUser(p)} 
                         title="מחיקת משתמש" 
-                        className="h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10"
+                        className="h-8 hover:text-destructive hover:bg-destructive/10 flex items-center"
                         disabled={session?.user?.id === p.id}
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3 h-3 ml-1.5" /> מחק
                       </Button>
                     </div>
                   </td>

@@ -5,6 +5,7 @@ import * as LucideIcons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContent } from "@/contexts/ContentContext";
+import { formatError } from "@/utils/errorHandler";
 
 const generateTicketNumber = () => {
   const array = new Uint32Array(1);
@@ -26,6 +27,7 @@ const OpenTicket = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState("");
 
   const renderIcon = (iconName: string | undefined, fallback: any) => {
     if (!iconName) return fallback;
@@ -132,6 +134,7 @@ const OpenTicket = () => {
 
       setTicketNumber(ticket);
       setSubmitted(true);
+      setGlobalError("");
     } catch (err: any) {
       let desc = "אירעה שגיאה בשליחת הפנייה. נסה שוב.";
       
@@ -143,6 +146,7 @@ const OpenTicket = () => {
       } else if (msg.includes("RATE_LIMIT:IP")) {
         desc = "נחסמת זמנית עקב ריבוי פניות. אנא המתן דקה.";
       } else {
+        desc = formatError(msg);
         // Forward unexpected/system errors to Telegram
         supabase.functions.invoke("notify-telegram", {
           body: {
@@ -153,6 +157,7 @@ const OpenTicket = () => {
         }).catch(console.error);
       }
 
+      setGlobalError(desc);
       toast({
         title: "שגיאה",
         description: desc,
@@ -219,16 +224,16 @@ const OpenTicket = () => {
   return (
     <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-8">
       <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <h1 className={`font-rubik font-bold text-foreground text-center ${getStyle("open_ticket_title") || "text-2xl mb-8"}`}>
+        <h1 className={`font-rubik font-bold text-foreground text-center ${getStyle("open_ticket_title") || "text-3xl mb-4"}`}>
           {content["open_ticket_title"]}
         </h1>
         {content["open_ticket_subtitle"] && (
-           <p className={`text-muted-foreground font-assistant text-center mb-6 ${getStyle("open_ticket_subtitle")}`}>
+           <p className={`text-muted-foreground font-assistant text-center mb-8 ${getStyle("open_ticket_subtitle")}`}>
             {content["open_ticket_subtitle"]}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-card rounded-lg p-6 sm:p-8 shadow-lg border border-border space-y-5">
+        <form onSubmit={handleSubmit} className="bg-card/70 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-2xl border border-border/50 space-y-5">
           {/* Full Name */}
           <div>
             <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_fullname")}`}>
@@ -334,9 +339,16 @@ const OpenTicket = () => {
             המידע מוגן ולא יועבר לצד שלישי. משמש אך ורק לצורך טיפול בפנייה.
           </p>
 
-          <Button type="submit" variant="hero" size="xl" className={`w-full flex-row-reverse mt-2 ${getStyle("btn_submit_ticket")}`} disabled={submitting}>
-            <span>{submitting ? content["msg_submitting"] : content["btn_submit_ticket"]}</span>
-            {renderIcon(getContentProps("btn_submit_ticket").icon, <LucideIcons.Send className="mr-2" />)}
+          {globalError && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm font-assistant flex items-start gap-2">
+              <LucideIcons.AlertTriangle className="w-5 h-5 shrink-0" />
+              <p>{globalError}</p>
+            </div>
+          )}
+
+          <Button type="submit" size="xl" className={`w-full flex-row-reverse mt-2 bg-teal-500 hover:bg-teal-600 text-white shadow-lg transition-colors border-none ${getStyle("btn_submit_ticket")}`} disabled={submitting}>
+            <span className="font-bold text-lg">{submitting ? content["msg_submitting"] : content["btn_submit_ticket"]}</span>
+            {renderIcon(getContentProps("btn_submit_ticket").icon, <LucideIcons.Send className="mr-2 w-5 h-5" />)}
           </Button>
         </form>
 

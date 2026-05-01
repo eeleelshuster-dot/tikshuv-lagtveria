@@ -7,24 +7,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { FilterPanel } from "@/components/FilterPanel";
 import { format, isSameDay } from "date-fns";
+import { StatusBadge, TicketTimeline } from "@/components/TicketUI";
+import { formatError } from "@/utils/errorHandler";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle,
+  SheetDescription
+} from "@/components/ui/sheet";
 
 type TicketStatus = "sent" | "in_progress" | "forwarded" | "resolved" | "closed";
 
-const statusLabels: Record<string, string> = {
-  sent: "נשלח",
-  in_progress: "בטיפול המדור",
-  forwarded: "הועבר לגורם הרלוונטי",
-  resolved: "טופל",
-  closed: "הפנייה נסגרה",
-};
-
-const statusStyles: Record<string, string> = {
-  sent: "bg-status-sent/20 text-status-sent",
-  in_progress: "bg-status-progress/20 text-status-progress",
-  forwarded: "bg-blue-500/20 text-blue-600",
-  resolved: "bg-status-resolved/20 text-status-resolved",
-  closed: "bg-status-closed text-white",
-};
+// Replaced by StatusBadge component config
 
 interface Ticket {
   id: string;
@@ -92,11 +87,16 @@ const CommanderDashboard = () => {
   };
 
   const fetchTickets = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("tickets")
       .select("id, ticket_number, full_name, department, phone, description, status, assignee_id, created_at, is_archived, is_closed_confirmed, ticket_updates(created_at)")
       .order("created_at", { ascending: false });
-    setTickets((data as any[]) || []);
+    
+    if (error) {
+      toast({ title: "שגיאה בטעינת פניות", description: formatError(error), variant: "destructive" });
+    } else {
+      setTickets((data as any[]) || []);
+    }
     setLoading(false);
   };
 
@@ -169,7 +169,7 @@ const CommanderDashboard = () => {
       setSelectedTicket(updated);
       setTickets(prev => prev.map(t => t.id === updated.id ? updated : t));
     } catch (e: any) {
-      toast({ title: "שגיאה באישור סגירה", description: e.message, variant: "destructive" });
+      toast({ title: "שגיאה באישור סגירה", description: formatError(e), variant: "destructive" });
     }
   };
 
@@ -216,16 +216,16 @@ const CommanderDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="hidden sm:block bg-card rounded-lg shadow-lg overflow-hidden">
-              <table className="w-full">
+            <div className="hidden sm:block bg-card rounded-lg shadow-lg overflow-hidden border border-border/50">
+              <table className="w-full text-right border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">תיאור</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
-                    <th className="text-right p-3 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תיאור</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
+                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,40 +235,41 @@ const CommanderDashboard = () => {
                       className="border-b border-border/50 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer"
                       onClick={() => openTicketDetail(ticket)}
                     >
-                      <td className="p-3 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
-                      <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
-                      <td className="p-3 font-assistant text-sm text-card-foreground">{ticket.department}</td>
-                      <td className="p-3 font-assistant text-sm text-card-foreground max-w-[200px] truncate">{ticket.description}</td>
-                      <td className="p-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-rubik font-medium ${statusStyles[ticket.status] || ''}`}>
-                          {statusLabels[ticket.status] || ticket.status}
-                        </span>
+                      <td className="p-4 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
+                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
+                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.department}</td>
+                      <td className="p-4 font-assistant text-sm text-card-foreground max-w-[200px] truncate">{ticket.description}</td>
+                      <td className="p-4">
+                        <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
                       </td>
-                      <td className="p-3 font-mono-ticket text-xs text-muted-foreground">{formatDate(ticket.created_at)}</td>
+                      <td className="p-4 font-mono-ticket text-xs text-muted-foreground">{formatDate(ticket.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            <div className="sm:hidden space-y-3">
+            <div className="sm:hidden space-y-4">
               {filtered.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="bg-card rounded-lg p-4 shadow-lg border border-border card-hover cursor-pointer"
+                  className="bg-card rounded-xl p-5 shadow-lg border border-border card-hover cursor-pointer"
                   onClick={() => openTicketDetail(ticket)}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-3">
                     <span className="font-mono-ticket text-sm font-bold text-card-foreground">{ticket.ticket_number}</span>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-rubik font-medium ${statusStyles[ticket.status] || ''}`}>
-                      {statusLabels[ticket.status] || ticket.status}
-                    </span>
+                    <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
                   </div>
-                  <p className="font-assistant text-sm text-card-foreground font-medium">{ticket.full_name} ({ticket.department})</p>
-                  <p className="font-assistant text-sm text-muted-foreground mt-1 line-clamp-2">{ticket.description}</p>
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <LucideIcons.Clock className="w-3 h-3" />
-                    <span className="font-mono-ticket">{formatDate(ticket.created_at)}</span>
+                  <p className="font-assistant text-sm text-card-foreground font-semibold">{ticket.full_name}</p>
+                  <p className="font-assistant text-xs text-muted-foreground mt-2 line-clamp-2">{ticket.description}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <LucideIcons.Clock className="w-3 h-3" />
+                      <span className="font-mono-ticket">{formatDate(ticket.created_at)}</span>
+                    </div>
+                    {ticket.department && (
+                      <span className="text-[10px] bg-secondary px-2 py-0.5 rounded text-muted-foreground">{ticket.department}</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -283,94 +284,108 @@ const CommanderDashboard = () => {
         )}
       </div>
 
-      {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedTicket(null)} />
-          <div className="relative w-full max-w-lg bg-card shadow-2xl overflow-y-auto animate-fade-in">
-            <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between z-10">
-              <h2 className="font-rubik font-bold text-card-foreground text-lg">פנייה {selectedTicket.ticket_number}</h2>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedTicket(null)}>
-                <LucideIcons.X className="w-5 h-5" />
-              </Button>
-            </div>
+      {/* Ticket Detail Slide-over */}
+      <Sheet open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-xl bg-card border-l border-border p-0 overflow-y-auto">
+          {selectedTicket && (
+            <div className="flex flex-col h-full">
+              <SheetHeader className="p-6 border-b border-border bg-secondary/20">
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="font-rubik text-2xl font-bold">פנייה {selectedTicket.ticket_number}</SheetTitle>
+                  <StatusBadge status={selectedTicket.status} isConfirmed={selectedTicket.is_closed_confirmed} />
+                </div>
+                <SheetDescription className="text-right font-assistant mt-2">
+                  מידע מפורט עבור מפקדים.
+                </SheetDescription>
+              </SheetHeader>
 
-            <div className="p-4 space-y-6">
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="p-6 space-y-8 flex-1">
+                {/* Visual Timeline */}
+                <div className="bg-secondary/10 rounded-xl p-4 border border-border/50">
+                  <h3 className="text-sm font-rubik font-bold mb-2 flex items-center gap-2">
+                    <LucideIcons.Activity className="w-4 h-4 text-primary" />
+                    סטטוס טיפול
+                  </h3>
+                  <TicketTimeline status={selectedTicket.status} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 pb-6 border-b border-border">
                   <div>
-                    <span className="text-muted-foreground font-assistant block">שם מלא</span>
-                    <span className="text-card-foreground font-assistant font-medium">{selectedTicket.full_name}</span>
+                    <span className="text-muted-foreground text-xs font-assistant block mb-1">שם מלא</span>
+                    <span className="text-card-foreground font-assistant font-bold text-lg">{selectedTicket.full_name}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground font-assistant block">מדור</span>
-                    <span className="text-card-foreground font-assistant">{selectedTicket.department}</span>
+                    <span className="text-muted-foreground text-xs font-assistant block mb-1">מדור</span>
+                    <span className="text-card-foreground font-assistant font-bold text-lg">{selectedTicket.department}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground font-assistant block">טלפון</span>
+                    <span className="text-muted-foreground text-xs font-assistant block mb-1">טלפון</span>
                     <span className="text-card-foreground font-mono-ticket">{selectedTicket.phone}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground font-assistant block">תאריך</span>
-                    <span className="text-card-foreground font-mono-ticket text-xs">{formatDate(selectedTicket.created_at)}</span>
+                    <span className="text-muted-foreground text-xs font-assistant block mb-1">תאריך פתיחה</span>
+                    <span className="text-card-foreground font-mono-ticket text-sm">{formatDate(selectedTicket.created_at)}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground font-assistant block">סטטוס</span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-rubik ${statusStyles[selectedTicket.status] || ''}`}>
-                      {statusLabels[selectedTicket.status] || selectedTicket.status}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground font-assistant block">גורם מטפל</span>
-                    <span className="text-card-foreground font-assistant text-xs">
+                    <span className="text-muted-foreground text-xs font-assistant block mb-1">גורם מטפל</span>
+                    <span className="text-card-foreground font-assistant text-sm">
                       {selectedTicket.assignee_id ? staffMap[selectedTicket.assignee_id] || "טוען..." : "לא משויך"}
                     </span>
                   </div>
                 </div>
+
                 {selectedTicket.description && (
-                  <div className="mt-4">
-                    <span className="text-muted-foreground font-assistant block text-sm">תיאור הפנייה</span>
-                    <p className="text-card-foreground font-assistant text-sm mt-1 p-3 bg-secondary/30 rounded-md whitespace-pre-wrap">
+                  <div>
+                    <h3 className="text-sm font-rubik font-bold mb-3 flex items-center gap-2">
+                      <LucideIcons.FileText className="w-4 h-4 text-primary" />
+                      תיאור הפנייה
+                    </h3>
+                    <div className="bg-secondary/20 p-4 rounded-lg border border-border/50 italic text-sm font-assistant leading-relaxed whitespace-pre-wrap">
                       {selectedTicket.description}
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-6 border-t border-border">
+                  <h3 className="text-sm font-rubik font-bold mb-4 flex items-center gap-2">
+                    <LucideIcons.History className="w-4 h-4 text-primary" />
+                    יומן עדכונים והערות פנימיות
+                  </h3>
+                  <div className="space-y-4">
+                    {ticketUpdates.map((u) => (
+                      <div key={u.id} className="relative pr-4 border-r-2 border-primary/20 pb-2">
+                        <div className="absolute top-0 -right-1.5 w-3 h-3 rounded-full bg-primary/40" />
+                        <p className="text-sm font-assistant text-foreground">{u.update_text}</p>
+                        <span className="text-[10px] text-muted-foreground font-mono mt-1 block">
+                          {formatDate(u.created_at)} {u.created_by && staffMap[u.created_by] ? `• ${staffMap[u.created_by]}` : ''}
+                        </span>
+                      </div>
+                    ))}
+                    {ticketUpdates.length === 0 && (
+                      <p className="text-muted-foreground text-xs italic font-assistant">אין עדכונים זמינים</p>
+                    )}
+                  </div>
+                </div>
+
+                {selectedTicket.status === "closed" && !selectedTicket.is_closed_confirmed && (
+                  <div className="pt-8 border-t border-border">
+                    <Button 
+                      className="w-full font-rubik flex items-center justify-center gap-2 py-6 bg-primary hover:bg-primary/90 text-lg shadow-lg"
+                      onClick={handleConfirmClose}
+                    >
+                      <LucideIcons.CheckCircle className="w-5 h-5" />
+                      אישור סגירת פנייה (ממתין לסגירה)
+                    </Button>
+                    <p className="text-center text-xs text-muted-foreground mt-3 font-assistant italic">
+                      אישור זה נדרש על מנת להעביר את הפנייה לארכיון המערכת.
                     </p>
                   </div>
                 )}
               </div>
-
-              <div className="border-t border-border pt-4">
-                <label className="flex items-center gap-2 font-rubik font-semibold text-card-foreground text-sm mb-2">
-                  <LucideIcons.MessageSquare className="w-4 h-4" />
-                  הערות פנימיות
-                </label>
-                <div className="space-y-3 mb-3 max-h-60 overflow-y-auto">
-                  {ticketUpdates.map((u) => (
-                    <div key={u.id} className="bg-secondary/30 rounded-md p-3">
-                      <p className="text-card-foreground font-assistant text-sm">{u.update_text}</p>
-                      <span className="text-muted-foreground font-mono-ticket text-xs mt-1 block">
-                        {formatDate(u.created_at)} {u.created_by && staffMap[u.created_by] ? `• ${staffMap[u.created_by]}` : ''}
-                      </span>
-                    </div>
-                  ))}
-                  {ticketUpdates.length === 0 && (
-                    <p className="text-muted-foreground font-assistant text-sm">אין עדכונים או הערות לפנייה זו.</p>
-                  )}
-                </div>
-              </div>
-
-              {selectedTicket.status === "closed" && !selectedTicket.is_closed_confirmed && (
-                <div className="border-t border-border pt-4 mt-8">
-                  <Button 
-                    className="w-full font-rubik flex items-center justify-center gap-2"
-                    onClick={handleConfirmClose}
-                  >
-                    <LucideIcons.CheckCircle className="w-4 h-4" />
-                    אישור סגירת פנייה (ממתין לסגירה)
-                  </Button>
-                </div>
-              )}
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

@@ -15,6 +15,8 @@ interface FilterPanelProps {
   setDepartmentFilter: (val: string) => void;
   dateFilter: Date | undefined;
   setDateFilter: (val: Date | undefined) => void;
+  showArchived?: boolean;
+  setShowArchived?: (val: boolean) => void;
   onClearFilters?: () => void;
 }
 
@@ -27,6 +29,8 @@ export const FilterPanel = ({
   setDepartmentFilter,
   dateFilter,
   setDateFilter,
+  showArchived = false,
+  setShowArchived,
   onClearFilters
 }: FilterPanelProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -43,7 +47,7 @@ export const FilterPanel = ({
         <span className="font-rubik font-medium text-sm">סינון וחיפוש</span>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {/* Search Input */}
         <div className="relative">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -123,6 +127,19 @@ export const FilterPanel = ({
             />
           </PopoverContent>
         </Popover>
+
+        {/* Show Archived Toggle */}
+        {setShowArchived && (
+          <div className="flex items-center justify-between px-3 h-10 rounded-md border border-border bg-input/50">
+            <span className="text-xs font-assistant text-muted-foreground">הצג ארכיון</span>
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 ${showArchived ? 'bg-primary' : 'bg-input'}`}
+            >
+              <span className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${showArchived ? '-translate-x-4' : '-translate-x-0.5'}`} />
+            </button>
+          </div>
+        )}
       </div>
       
       {onClearFilters && (searchQuery || statusFilter !== 'all' || departmentFilter !== 'all' || dateFilter) && (

@@ -4,22 +4,12 @@ import { Button } from "@/components/ui/button";
 import * as LucideIcons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useContent } from "@/contexts/ContentContext";
+import { StatusBadge, TicketTimeline } from "@/components/TicketUI";
+import { formatError } from "@/utils/errorHandler";
 
 type TicketStatus = "sent" | "in_progress" | "resolved" | "closed";
 
-const statusLabels: Record<TicketStatus, string> = {
-  sent: "נשלח",
-  in_progress: "בטיפול",
-  resolved: "טופל",
-  closed: "הפנייה נסגרה",
-};
-
-const statusStyles: Record<TicketStatus, string> = {
-  sent: "bg-status-sent/20 text-status-sent",
-  in_progress: "bg-status-progress/20 text-status-progress",
-  resolved: "bg-status-resolved/20 text-status-resolved",
-  closed: "bg-status-closed/20 text-status-closed",
-};
+// Replaced by StatusBadge component config
 
 interface TicketResult {
   ticket_number: string;
@@ -111,7 +101,7 @@ const TrackTicket = () => {
 
       setTicket(prev => prev ? { ...prev, is_closed_confirmed: true } : null);
     } catch (err: any) {
-      setError(err.message || "אירעה שגיאה באישור סגירת הפנייה");
+      setError(formatError(err));
     } finally {
       setConfirming(false);
     }
@@ -131,12 +121,17 @@ const TrackTicket = () => {
 
   return (
     <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <h1 className={`font-rubik font-bold text-foreground text-center ${getStyle("track_ticket_title") || "text-2xl mb-8"}`}>
+      <div className="relative z-10 w-full max-w-xl animate-fade-in">
+        <h1 className={`font-rubik font-bold text-foreground text-center ${getStyle("track_ticket_title") || "text-3xl mb-4"}`}>
           {content["track_ticket_title"]}
         </h1>
+        {content["track_ticket_subtitle"] && (
+           <p className="text-muted-foreground font-assistant text-center mb-8">
+            עקוב אחר סטטוס הטיפול בפנייתך בזמן אמת.
+          </p>
+        )}
 
-        <form onSubmit={handleSearch} className="bg-card rounded-lg p-6 sm:p-8 shadow-lg">
+        <form onSubmit={handleSearch} className="bg-card/70 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-2xl border border-border/50">
           <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_ticket_number")}`}>
             {content["label_ticket_number"]}
           </label>
@@ -159,37 +154,55 @@ const TrackTicket = () => {
         {searched && (
           <div className="mt-6 animate-fade-in">
             {ticket ? (
-              <div className="bg-card rounded-lg p-6 sm:p-8 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono-ticket text-lg font-bold text-card-foreground">{ticket.ticket_number}</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-rubik font-medium ${statusStyles[ticket.status]}`}>
-                    {statusLabels[ticket.status]}
-                  </span>
+              <div className="bg-card/80 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-2xl border border-border/50">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground font-assistant mb-1">פנייה מספר</span>
+                    <span className="font-mono-ticket text-2xl font-bold text-primary">{ticket.ticket_number}</span>
+                  </div>
+                  <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
                 </div>
-                <p className="text-sm text-muted-foreground font-assistant mb-4">
-                  {content["label_date"]} פתיחה: {formatDate(ticket.created_at)}
-                </p>
+
+                {/* Timeline Visualization */}
+                <div className="mb-8 p-4 bg-secondary/20 rounded-lg border border-border/30">
+                  <h3 className="text-xs font-rubik font-bold text-muted-foreground mb-4 uppercase tracking-wider">תהליך הטיפול בפנייה</h3>
+                  <TicketTimeline status={ticket.status} />
+                </div>
+
+                <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground bg-muted/30 w-fit px-3 py-1.5 rounded-full border border-border/20">
+                  <LucideIcons.Calendar className="w-3.5 h-3.5" />
+                  <span>נפתחה בתאריך: {formatDate(ticket.created_at)}</span>
+                </div>
                 {ticket.updates.length > 0 && (
-                  <div className="border-t border-border pt-4">
-                    <h3 className="font-rubik font-semibold text-card-foreground text-sm mb-3">{content["label_recent_updates"]}</h3>
-                    <div className="space-y-3">
+                  <div className="border-t border-border/50 pt-6">
+                    <h3 className="font-rubik font-bold text-card-foreground text-sm mb-4 flex items-center gap-2">
+                      <LucideIcons.History className="w-4 h-4 text-primary" />
+                      עדכוני מערכת אחרונים
+                    </h3>
+                    <div className="space-y-4">
                       {ticket.updates.map((update, i) => (
-                        <div key={i} className="flex gap-3 text-sm">
-                          <span className="text-muted-foreground font-mono-ticket whitespace-nowrap">{formatDate(update.created_at)}</span>
-                          <span className="text-card-foreground font-assistant">{update.update_text}</span>
+                        <div key={i} className="relative pr-4 border-r-2 border-primary/20 pb-1">
+                          <div className="absolute top-0 -right-1.5 w-3 h-3 rounded-full bg-primary/30" />
+                          <p className="text-sm font-assistant text-card-foreground leading-relaxed">{update.update_text}</p>
+                          <span className="text-[10px] text-muted-foreground font-mono mt-1 block">{formatDate(update.created_at)}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
                 {ticket.status === 'closed' && !ticket.is_closed_confirmed && (
-                  <div className="mt-6 border-t border-border pt-4 text-center">
-                    <p className="text-sm font-assistant text-card-foreground mb-3 font-medium">
-                      פנייה זו נסגרה. האם הטיפול הושלם לשביעות רצונך?
-                    </p>
-                    <Button onClick={handleConfirmClosure} disabled={confirming} className="w-full sm:w-auto font-rubik flex items-center justify-center gap-2">
-                      <LucideIcons.CheckCircle className="w-4 h-4" />
-                      {confirming ? "מאשר..." : "אשר סגירת פנייה"}
+                  <div className="mt-8 pt-6 border-t border-border/50 text-center">
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 mb-4">
+                      <p className="text-sm font-assistant text-amber-600 font-bold mb-2">
+                        הטיפול בפנייתך הושלם.
+                      </p>
+                      <p className="text-xs font-assistant text-amber-500">
+                        האם אתה מאשר את סגירת הפנייה? אישור זה יעזור לנו לשפר את השירות.
+                      </p>
+                    </div>
+                    <Button onClick={handleConfirmClosure} disabled={confirming} className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 shadow-lg transition-transform active:scale-[0.98]">
+                      <LucideIcons.CheckCircle2 className="ml-2 w-5 h-5" />
+                      {confirming ? "מאשר סגירה..." : "אשר סגירת פנייה"}
                     </Button>
                   </div>
                 )}
