@@ -15,23 +15,27 @@
     --popover: 210 20% 96%;
     --popover-foreground: 220 43% 11%;
 
-    /* Primary - flat teal */
-    --primary: 191 100% 21%;
+    /* Primary - More saturated teal */
+    --primary: 191 100% 30%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 191 100% 26%;
-    --primary-active: 191 100% 18%;
+    --primary-hover: 191 100% 35%;
+    --primary-active: 191 100% 25%;
 
-    /* Secondary */
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 220 43% 11%;
+    /* Secondary - Lighter card contrast */
+    --secondary: 230 42% 25%;
+    --secondary-foreground: 0 0% 100%;
 
     /* Muted */
-    --muted: 220 13% 91%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 230 42% 20%;
+    --muted-foreground: 230 15% 70%;
 
-    /* Accent - electric indigo */
-    --accent: 253 98% 51%;
+    /* Accent - Vibrant electric indigo & cyan mix */
+    --accent: 191 100% 45%;
     --accent-foreground: 0 0% 100%;
+    
+    /* Extra accent for depth */
+    --accent-gold: 38 92% 55%;
+    --accent-cyan: 180 100% 50%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
@@ -42,7 +46,8 @@
     --input: 0 0% 100%;
     --ring: 191 100% 21%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    --radius-card: 1.25rem;
 
     /* Sidebar */
     --sidebar-background: 230 42% 17%;
@@ -72,11 +77,18 @@
     /* Input text - #111827 */
     --input-text: 222 39% 11%;
 
-    /* Status colors */
-    --status-sent: 210 40% 50%;
-    --status-in-progress: 38 92% 50%;
-    --status-resolved: 142 71% 40%;
-    --status-closed: 220 13% 46%;
+    /* Status colors - WCAG friendly */
+    --status-sent: 25 95% 60%;
+    --status-in-progress: 210 100% 60%;
+    --status-resolved: 142 76% 50%;
+    --status-closed: 230 15% 55%;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -126,18 +138,33 @@
     pointer-events: none;
   }
 
-  .focus-double-ring:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring-inner), var(--focus-ring-outer);
-  }
-
   .card-hover {
-    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-hover:hover {
-    box-shadow: var(--card-shadow-hover) !important;
-    transform: translateY(-1px);
+    box-shadow: var(--shadow-premium) !important;
+    transform: translateY(-2px) scale(1.005);
+    border-color: hsla(var(--primary), 0.4);
+  }
+  
+  .btn-transition {
+    transition: all 0.2s ease;
+  }
+  
+  .btn-transition:active {
+    transform: scale(0.97);
+  }
+
+  /* Typography Refinement */
+  h1 { @apply text-4xl font-bold tracking-tight mb-6; }
+  h2 { @apply text-2xl font-semibold tracking-tight mb-4; }
+  h3 { @apply text-xl font-medium mb-3; }
+  p { @apply leading-relaxed; }
+
+  /* Premium Card base */
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border border-border/40 shadow-premium rounded-[var(--radius-card)];
   }
 
   /* Darken input text for visibility */

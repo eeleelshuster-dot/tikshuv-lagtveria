@@ -202,6 +202,24 @@ const CommanderDashboard = () => {
           </div>
         </div>
 
+        {/* Metrics Summary Dashboard */}
+        {!loading && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: 'פניות פתוחות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent' },
+              { label: 'בטיפול שוטף', count: tickets.filter(t => t.status === 'in_progress' || t.status === 'forwarded').length, icon: LucideIcons.Clock, color: 'text-status-progress' },
+              { label: 'ממתין לסגירה', count: tickets.filter(t => t.status === 'closed' && !t.is_closed_confirmed).length, icon: LucideIcons.AlertCircle, color: 'text-accent-gold' },
+              { label: 'נסגרו היום', count: tickets.filter(t => t.status === 'closed' && t.is_closed_confirmed && isSameDay(new Date(t.created_at), new Date())).length, icon: LucideIcons.CheckCircle2, color: 'text-status-resolved' },
+            ].map((stat, i) => (
+              <div key={i} className="glass-card p-4 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-top-4" style={{ animationDelay: `${i * 100}ms` }}>
+                <stat.icon className={`w-6 h-6 mb-2 ${stat.color}`} />
+                <span className="text-2xl font-bold font-mono-ticket">{stat.count}</span>
+                <span className="text-xs text-muted-foreground font-assistant">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <FilterPanel 
           searchQuery={searchQuery} setSearchQuery={setSearchQuery}
           statusFilter={statusFilter} setStatusFilter={setStatusFilter}
@@ -216,35 +234,48 @@ const CommanderDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="hidden sm:block bg-card rounded-lg shadow-lg overflow-hidden border border-border/50">
+            <div className="hidden lg:block glass-card overflow-hidden">
               <table className="w-full text-right border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-secondary/50">
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תיאור</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
+                  <tr className="border-b border-border/50 bg-secondary/30">
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">מספר פנייה</th>
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">פרטי פונה</th>
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">מדור</th>
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">תוכן הפנייה</th>
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">סטטוס</th>
+                    <th className="p-5 font-rubik font-bold text-muted-foreground text-xs uppercase tracking-wider">תאריך</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      className="border-b border-border/50 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer"
-                      onClick={() => openTicketDetail(ticket)}
-                    >
-                      <td className="p-4 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.department}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground max-w-[200px] truncate">{ticket.description}</td>
-                      <td className="p-4">
-                        <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
-                      </td>
-                      <td className="p-4 font-mono-ticket text-xs text-muted-foreground">{formatDate(ticket.created_at)}</td>
-                    </tr>
-                  ))}
+                  {filtered.map((ticket) => {
+                    const isStuck = ticket.status === 'in_progress' && (new Date().getTime() - new Date(ticket.created_at).getTime() > 3 * 24 * 60 * 60 * 1000);
+                    return (
+                      <tr
+                        key={ticket.id}
+                        className={`border-b border-border/40 hover:bg-secondary/20 transition-all duration-200 cursor-pointer group ${isStuck ? 'bg-destructive/5' : ''}`}
+                        onClick={() => openTicketDetail(ticket)}
+                      >
+                        <td className="p-5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono-ticket text-sm font-bold text-primary group-hover:underline">{ticket.ticket_number}</span>
+                            {isStuck && <Badge variant="destructive" className="text-[9px] h-4 px-1 animate-pulse">תקוע</Badge>}
+                          </div>
+                        </td>
+                        <td className="p-5">
+                          <div className="flex flex-col">
+                            <span className="font-assistant text-sm font-bold">{ticket.full_name}</span>
+                            <span className="font-assistant text-[10px] text-muted-foreground">{ticket.phone}</span>
+                          </div>
+                        </td>
+                        <td className="p-5 font-assistant text-sm">{ticket.department}</td>
+                        <td className="p-5 font-assistant text-sm max-w-[250px] truncate text-muted-foreground">{ticket.description}</td>
+                        <td className="p-5">
+                          <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
+                        </td>
+                        <td className="p-5 font-mono-ticket text-[11px] text-muted-foreground">{formatDate(ticket.created_at)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

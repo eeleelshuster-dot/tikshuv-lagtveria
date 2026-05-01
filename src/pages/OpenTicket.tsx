@@ -224,16 +224,17 @@ const OpenTicket = () => {
   return (
     <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-8">
       <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <h1 className={`font-rubik font-bold text-foreground text-center ${getStyle("open_ticket_title") || "text-3xl mb-4"}`}>
+        <h1 className="text-3xl md:text-4xl font-rubik font-bold text-center mb-6 text-foreground">
           {content["open_ticket_title"]}
         </h1>
         {content["open_ticket_subtitle"] && (
-           <p className={`text-muted-foreground font-assistant text-center mb-8 ${getStyle("open_ticket_subtitle")}`}>
+           <p className="text-muted-foreground font-assistant text-center mb-8 text-lg">
             {content["open_ticket_subtitle"]}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-card/70 backdrop-blur-md rounded-xl p-6 sm:p-8 shadow-2xl border border-border/50 space-y-5">
+        <div className="glass-card p-6 sm:p-10 space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Full Name */}
           <div>
             <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_fullname")}`}>
@@ -346,11 +347,12 @@ const OpenTicket = () => {
             </div>
           )}
 
-          <Button type="submit" size="xl" className={`w-full flex-row-reverse mt-2 bg-teal-500 hover:bg-teal-600 text-white shadow-lg transition-colors border-none ${getStyle("btn_submit_ticket")}`} disabled={submitting}>
+          <Button type="submit" size="xl" className="w-full flex-row-reverse mt-4 bg-primary hover:bg-primary/90 text-white shadow-premium h-14" disabled={submitting}>
             <span className="font-bold text-lg">{submitting ? content["msg_submitting"] : content["btn_submit_ticket"]}</span>
             {renderIcon(getContentProps("btn_submit_ticket").icon, <LucideIcons.Send className="mr-2 w-5 h-5" />)}
           </Button>
         </form>
+        </div>
 
         <div className="text-center mt-6">
           <Button asChild variant="ghost" className="text-foreground/70 hover:text-foreground">

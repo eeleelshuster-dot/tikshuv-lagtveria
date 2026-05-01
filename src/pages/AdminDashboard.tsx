@@ -30,10 +30,18 @@ import {
   SheetTitle,
   SheetDescription
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserManagement } from "@/components/creator/UserManagement";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type TicketStatus = "sent" | "in_progress" | "resolved" | "closed";
-
-// Replaced by StatusBadge component config
+const statusLabels: Record<string, string> = {
+  sent: "נשלח",
+  in_progress: "בטיפול המדור",
+  forwarded: "הועבר לגורם הרלוונטי",
+  resolved: "טופל",
+  closed: "הפנייה נסגרה",
+};
 
 interface Ticket {
   id: string;
@@ -193,57 +201,55 @@ const AdminDashboard = () => {
     setTicketUpdates((data as any[]) || []);
   };
 
-  const handleStatusChange = async (newStatus: TicketStatus) => {
-    if (!selectedTicket) return;
+  const handleStatusChange = async (ticketId: string, newStatus: TicketStatus) => {
     setSavingStatus(true);
-    await supabase
+    const { error } = await supabase
       .from("tickets")
       .update({ status: newStatus } as any)
-      .eq("id", selectedTicket.id);
+      .eq("id", ticketId);
 
-    await supabase.from("ticket_updates").insert({
-      ticket_id: selectedTicket.id,
-      update_text: `סטטוס שונה ל: ${statusLabels[newStatus]}`,
-      created_by: profile?.id,
-    } as any);
+    if (error) {
+      toast({ title: "שגיאה בעדכון סטטוס", description: formatError(error), variant: "destructive" });
+    } else {
+      await supabase.from("ticket_updates").insert({
+        ticket_id: ticketId,
+        update_text: `סטטוס שונה ל: ${statusLabels[newStatus] || newStatus}`,
+        created_by: profile?.id,
+      } as any);
 
-    setSelectedTicket({ ...selectedTicket, status: newStatus });
-    setTickets((prev) => prev.map((t) => (t.id === selectedTicket.id ? { ...t, status: newStatus } : t)));
-    
-    // Refresh updates
-    const { data } = await supabase
-      .from("ticket_updates")
-      .select("id, update_text, created_at, created_by")
-      .eq("ticket_id", selectedTicket.id)
-      .order("created_at", { ascending: true });
-    setTicketUpdates((data as any[]) || []);
+      setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)));
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket({ ...selectedTicket, status: newStatus });
+      }
+      toast({ title: "סטטוס עודכן בהצלחה" });
+    }
     setSavingStatus(false);
   };
 
-  const handleAssigneeChange = async (assigneeId: string) => {
-    if (!selectedTicket) return;
+  const handleAssigneeChange = async (ticketId: string, assigneeId: string) => {
     setSavingAssignee(true);
-    const aid = assigneeId || null;
-    await supabase
+    const aid = assigneeId === "none" ? null : assigneeId;
+    const { error } = await supabase
       .from("tickets")
       .update({ assignee_id: aid } as any)
-      .eq("id", selectedTicket.id);
+      .eq("id", ticketId);
 
-    const assigneeName = staffList.find((s) => s.id === assigneeId)?.full_name || "לא משויך";
-    await supabase.from("ticket_updates").insert({
-      ticket_id: selectedTicket.id,
-      update_text: `שויך ל: ${assigneeName}`,
-      created_by: profile?.id,
-    } as any);
+    if (error) {
+      toast({ title: "שגיאה בשינוי משויך", description: formatError(error), variant: "destructive" });
+    } else {
+      const assigneeName = staffList.find((s) => s.id === aid)?.full_name || "לא משויך";
+      await supabase.from("ticket_updates").insert({
+        ticket_id: ticketId,
+        update_text: `שויך ל: ${assigneeName}`,
+        created_by: profile?.id,
+      } as any);
 
-    setSelectedTicket({ ...selectedTicket, assignee_id: aid });
-    
-    const { data } = await supabase
-      .from("ticket_updates")
-      .select("id, update_text, created_at, created_by")
-      .eq("ticket_id", selectedTicket.id)
-      .order("created_at", { ascending: true });
-    setTicketUpdates((data as any[]) || []);
+      setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, assignee_id: aid } : t)));
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket({ ...selectedTicket, assignee_id: aid });
+      }
+      toast({ title: "משויך עודכן בהצלחה" });
+    }
     setSavingAssignee(false);
   };
 
@@ -322,7 +328,7 @@ const AdminDashboard = () => {
     const matchesStatus = statusFilter === "all" || t.status === statusFilter;
     const matchesDept = departmentFilter === "all" || t.department === departmentFilter;
     const matchesDate = !dateFilter || isSameDay(new Date(t.created_at), dateFilter) || (t.ticket_updates && t.ticket_updates.some((u: any) => isSameDay(new Date(u.created_at), dateFilter)));
-    const matchesArchive = showArchive ? true : !t.is_archived;
+    const matchesArchive = showArchive ? t.is_archived : !t.is_archived;
     return matchesSearch && matchesStatus && matchesDept && matchesDate && matchesArchive;
   });
 
@@ -332,130 +338,158 @@ const AdminDashboard = () => {
   const formatDate = (iso: string) => new Date(iso).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-6">
-      <div className="relative z-10 max-w-6xl mx-auto animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className={`font-rubik font-bold text-foreground ${getStyle("admin_dashboard_title") || "text-xl sm:text-2xl"}`}>
-            {content["admin_dashboard_title"]}
-          </h1>
-          <div className="flex items-center gap-3">
-            {profile?.role === "creator" && (
-              <Button asChild variant="outline" size="sm" className="hidden sm:flex flex-row-reverse border-border/50 text-foreground/80 hover:text-foreground hover:bg-secondary/50">
-                <Link to="/creator">
-                  <span>לוח יוצר</span>
-                  <LucideIcons.Settings className="mr-2 w-4 h-4" />
-                </Link>
-              </Button>
-            )}
-            <div className="flex items-center gap-2">
-              <LucideIcons.User className="w-5 h-5 text-foreground/60" />
-              <span className="text-sm text-foreground/60 font-assistant">{profile?.full_name || "מנהל"}</span>
+    <div className="bg-gradient-main min-h-screen px-4 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto animate-fade-in">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="font-rubik font-bold text-foreground text-3xl">לוח מנהל מערכת</h1>
+            <p className="text-muted-foreground font-assistant mt-1">ניהול פניות, משתמשים והרשאות</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-secondary/20 px-3 py-1.5 rounded-full border border-border/30">
+              <LucideIcons.Shield className="w-4 h-4 text-primary" />
+              <span className="text-sm font-assistant font-bold">{profile?.full_name || "מנהל"}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={signOut} title="התנתק" className="text-foreground/60 hover:text-foreground">
-              <LucideIcons.LogOut className="w-4 h-4" />
+            <Button variant="ghost" size="sm" onClick={signOut} title="התנתק" className="text-muted-foreground hover:text-foreground">
+              <LucideIcons.LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        <FilterPanel 
-          searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-          departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
-          dateFilter={dateFilter} setDateFilter={setDateFilter}
-          showArchived={showArchive} setShowArchived={setShowArchive}
-          onClearFilters={clearFilters}
-        />
+        {/* Unified Dashboard Tabs */}
+        <Tabs defaultValue="tickets" className="space-y-8">
+          <TabsList className="bg-secondary/20 border border-border/30 p-1 rounded-xl h-14">
+            <TabsTrigger value="tickets" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-rubik font-bold">
+              <LucideIcons.Ticket className="w-4 h-4 ml-2" />
+              ניהול פניות
+            </TabsTrigger>
+            <TabsTrigger value="users" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-rubik font-bold">
+              <LucideIcons.Users className="w-4 h-4 ml-2" />
+              ניהול משתמשים
+            </TabsTrigger>
+          </TabsList>
 
-        {loading ? (
-          <div className="bg-card rounded-lg p-8 shadow-lg text-center">
-            <p className="text-muted-foreground font-assistant animate-pulse">טוען פניות...</p>
-          </div>
-        ) : (
-          <>
-            {/* Desktop table */}
-            <div className="hidden sm:block bg-card rounded-lg shadow-lg overflow-hidden border border-border/50">
-              <table className="w-full text-right border-collapse">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/50">
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מספר פנייה</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">שם מלא</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">מדור</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תיאור</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">סטטוס</th>
-                    <th className="p-4 font-rubik font-semibold text-card-foreground text-sm">תאריך</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      className={`border-b border-border/50 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer ${ticket.is_archived ? 'opacity-60 bg-muted/20' : ''}`}
-                      onClick={() => openTicketDetail(ticket)}
-                    >
-                      <td className="p-4 font-mono-ticket text-sm text-card-foreground">{ticket.ticket_number}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.full_name}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground">{ticket.department}</td>
-                      <td className="p-4 font-assistant text-sm text-card-foreground max-w-[200px] truncate">{ticket.description}</td>
-                      <td className="p-4">
-                        <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
-                      </td>
-                      <td className="p-4 font-mono-ticket text-xs text-muted-foreground">{formatDate(ticket.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filtered.length === 0 && (
-                <div className="p-12 text-center">
-                  <p className="text-muted-foreground font-assistant">{content["admin_dashboard_no_tickets"]}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile cards */}
-            <div className="sm:hidden space-y-4">
-              {filtered.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className={`bg-card rounded-xl p-5 shadow-lg border border-border card-hover cursor-pointer ${ticket.is_archived ? 'opacity-70 grayscale-[0.3]' : ''}`}
-                  onClick={() => openTicketDetail(ticket)}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono-ticket text-sm font-bold text-card-foreground">{ticket.ticket_number}</span>
-                    <StatusBadge status={ticket.status} isConfirmed={ticket.is_closed_confirmed} />
+          <TabsContent value="tickets" className="space-y-6">
+            {/* Quick Summary Metrics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'פניות חדשות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent' },
+                { label: 'בטיפול', count: tickets.filter(t => t.status === 'in_progress').length, icon: LucideIcons.Clock, color: 'text-status-progress' },
+                { label: 'טופלו', count: tickets.filter(t => t.status === 'resolved').length, icon: LucideIcons.CheckCircle, color: 'text-status-resolved' },
+                { label: 'ארכיון', count: tickets.filter(t => t.is_archived).length, icon: LucideIcons.Archive, color: 'text-muted-foreground' },
+              ].map((stat, i) => (
+                <div key={i} className="glass-card p-5 flex items-center gap-4">
+                  <div className={`p-3 rounded-xl bg-secondary/30 ${stat.color}`}>
+                    <stat.icon className="w-6 h-6" />
                   </div>
-                  <p className="font-assistant text-sm text-card-foreground font-semibold">{ticket.full_name}</p>
-                  <p className="font-assistant text-xs text-muted-foreground mt-2 line-clamp-2">{ticket.description}</p>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <LucideIcons.Clock className="w-3 h-3" />
-                      <span className="font-mono-ticket">{formatDate(ticket.created_at)}</span>
-                    </div>
-                    {ticket.department && (
-                      <span className="text-[10px] bg-secondary px-2 py-0.5 rounded text-muted-foreground">{ticket.department}</span>
-                    )}
+                  <div>
+                    <span className="text-2xl font-bold font-mono-ticket block leading-none">{stat.count}</span>
+                    <span className="text-xs text-muted-foreground font-assistant mt-1">{stat.label}</span>
                   </div>
                 </div>
               ))}
-              {filtered.length === 0 && (
-                <div className="bg-card rounded-lg p-8 shadow-lg text-center">
-                  <p className="text-muted-foreground font-assistant">{content["admin_dashboard_no_tickets"]}</p>
-                </div>
-              )}
             </div>
-            
 
-            
-          </>
-        )}
+            <FilterPanel 
+              searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+              statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+              departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
+              dateFilter={dateFilter} setDateFilter={setDateFilter}
+              onClearFilters={clearFilters}
+              showArchived={showArchive}
+              setShowArchived={setShowArchive}
+            />
 
-        <div className="text-center mt-8">
-          <Button asChild variant="ghost" className="text-foreground/70 hover:text-foreground">
-            <Link to="/">
-              <LucideIcons.ArrowRight className="ml-2" />
-              {content["btn_back_home"]}
-            </Link>
-          </Button>
-        </div>
+            {loading ? (
+              <div className="glass-card p-12 text-center">
+                <p className="text-muted-foreground font-assistant animate-pulse">טוען פניות מערכת...</p>
+              </div>
+            ) : (
+              <div className="lg:block glass-card overflow-hidden">
+                <table className="w-full text-right border-collapse">
+                  <thead>
+                    <tr className="border-b border-border/50 bg-secondary/30">
+                      <th className="p-4 font-rubik font-bold text-muted-foreground text-xs uppercase">פנייה</th>
+                      <th className="p-4 font-rubik font-bold text-muted-foreground text-xs uppercase">פונה ומדור</th>
+                      <th className="p-4 font-rubik font-bold text-muted-foreground text-xs uppercase">סטטוס טיפול</th>
+                      <th className="p-4 font-rubik font-bold text-muted-foreground text-xs uppercase">גורם משויך</th>
+                      <th className="p-4 font-rubik font-bold text-muted-foreground text-xs uppercase">פעולות</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((ticket) => (
+                        <tr key={ticket.id} className="border-b border-border/40 hover:bg-secondary/10 transition-colors group">
+                          <td className="p-4">
+                            <div className="flex flex-col">
+                              <span className="font-mono-ticket text-sm font-bold text-primary group-hover:underline cursor-pointer" onClick={() => openTicketDetail(ticket)}>{ticket.ticket_number}</span>
+                              <span className="text-[10px] text-muted-foreground">{formatDate(ticket.created_at)}</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-col">
+                              <span className="font-assistant text-sm font-bold">{ticket.full_name}</span>
+                              <span className="text-xs text-muted-foreground">{ticket.department || "ללא מדור"}</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <Select 
+                              value={ticket.status} 
+                              onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
+                            >
+                              <SelectTrigger className="h-9 w-[140px] bg-secondary/20 border-border/40 font-assistant text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sent">נשלח</SelectItem>
+                                <SelectItem value="in_progress">בטיפול</SelectItem>
+                                <SelectItem value="forwarded">הועבר</SelectItem>
+                                <SelectItem value="resolved">טופל</SelectItem>
+                                <SelectItem value="closed">סגור</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-4">
+                            <Select 
+                              value={ticket.assignee_id || "none"} 
+                              onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
+                            >
+                              <SelectTrigger className="h-9 w-[160px] bg-secondary/20 border-border/40 font-assistant text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">לא משויך</SelectItem>
+                                {staffList.map((s) => (
+                                  <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-4">
+                            <Button variant="ghost" size="sm" onClick={() => openTicketDetail(ticket)} className="hover:bg-primary/10 text-primary">
+                              <LucideIcons.ExternalLink className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-12 text-center text-muted-foreground font-assistant italic">
+                          לא נמצאו פניות תואמות לחיפוש זה.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="users" className="animate-in fade-in slide-in-from-left-4">
+            <div className="glass-card p-6">
+              <UserManagement session={null} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Ticket Detail Slide-over */}
@@ -513,41 +547,6 @@ const AdminDashboard = () => {
                     {selectedTicket.description}
                   </div>
                 </div>
-
-                {/* Management Controls */}
-                {!selectedTicket.is_archived && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-rubik font-bold text-muted-foreground block">עדכון סטטוס</label>
-                      <select
-                        value={selectedTicket.status}
-                        onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
-                        disabled={savingStatus}
-                        className="w-full h-10 px-3 rounded-md border border-border bg-input font-assistant text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                      >
-                        <option value="sent">נשלח</option>
-                        <option value="in_progress">בטיפול המדור</option>
-                        <option value="forwarded">הועבר לגורם רלוונטי</option>
-                        <option value="resolved">טופל</option>
-                        <option value="closed">הפנייה נסגרה</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-rubik font-bold text-muted-foreground block">שיוך טכנאי/מטפל</label>
-                      <select
-                        value={selectedTicket.assignee_id || ""}
-                        onChange={(e) => handleAssigneeChange(e.target.value)}
-                        disabled={savingAssignee}
-                        className="w-full h-10 px-3 rounded-md border border-border bg-input font-assistant text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                      >
-                        <option value="">לא משויך</option>
-                        {staffList.map((s) => (
-                          <option key={s.id} value={s.id}>{s.full_name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
 
                 {/* Updates Log */}
                 <div className="pt-6 border-t border-border">
