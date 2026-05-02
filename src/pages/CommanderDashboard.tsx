@@ -178,11 +178,7 @@ const CommanderDashboard = () => {
 
   const formatDate = (iso: string) => new Date(iso).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
-  const metrics = [
-    { label: 'פניות חדשות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent', bg: 'bg-status-sent/10' },
-    { label: 'בטיפול המדור', count: tickets.filter(t => t.status === 'in_progress' || t.status === 'forwarded').length, icon: LucideIcons.Activity, color: 'text-status-progress', bg: 'bg-status-progress/10' },
-    { label: 'ממתין לסגירה', count: tickets.filter(t => t.status === 'closed' && !t.is_closed_confirmed).length, icon: LucideIcons.AlertCircle, color: 'text-accent-gold', bg: 'bg-accent-gold/10' },
-    { label: 'נסגרו היום', count: tickets.filter(t => t.status === 'closed' && t.is_closed_confirmed && isSameDay(new Date(t.created_at), new  return (
+  return (
     <div className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-7xl mx-auto space-y-10 animate-fade-in">
         {/* Header Section */}
