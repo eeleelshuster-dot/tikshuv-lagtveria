@@ -8,7 +8,7 @@ import { useContent } from "@/contexts/ContentContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { user, profile, signIn, loading: authLoading } = useAuth();
+  const { user, profile, signIn, signOut, loading: authLoading } = useAuth();
   const { content, getContentProps } = useContent();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +49,8 @@ const AdminLogin = () => {
       } else if (profile.role === "commander") {
         navigate("/commander", { replace: true });
       } else {
-        navigate("/", { replace: true });
+        // Logged in but no administrative role - clear session to allow proper login
+        signOut().then(() => navigate("/admin-login", { replace: true }));
       }
     }
   }, [user, profile, authLoading, navigate]);

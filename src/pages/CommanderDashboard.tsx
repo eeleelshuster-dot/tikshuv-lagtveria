@@ -9,6 +9,7 @@ import { FilterPanel } from "@/components/FilterPanel";
 import { format, isSameDay, differenceInDays } from "date-fns";
 import { StatusBadge, TicketTimeline } from "@/components/TicketUI";
 import { formatError } from "@/utils/errorHandler";
+import { useContent } from "@/contexts/ContentContext";
 import { 
   Sheet, 
   SheetContent, 
@@ -44,6 +45,7 @@ interface TicketUpdate {
 
 const CommanderDashboard = () => {
   const { profile, signOut } = useAuth();
+  const { content } = useContent();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 

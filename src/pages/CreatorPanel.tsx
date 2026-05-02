@@ -77,8 +77,8 @@ const CreatorPanel = () => {
           </Button>
         </div>
 
-        {/* Custom Tabs */}
-        <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md w-fit">
+        {/* Custom Tabs Navigation */}
+        <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-3 p-2 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md w-full sm:w-fit">
           {[
             { id: 'users', label: 'ניהול משתמשים', icon: LucideIcons.Users },
             { id: 'content', label: 'ניהול תוכן (CMS)', icon: LucideIcons.Settings },
@@ -87,14 +87,14 @@ const CreatorPanel = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-rubik font-bold text-sm transition-all ${
+              className={`flex items-center justify-center sm:justify-start gap-3 px-6 py-4 rounded-xl font-rubik font-bold text-sm transition-all ${
                 activeTab === tab.id 
                 ? "bg-primary text-white shadow-glow-primary" 
                 : "text-white/40 hover:text-white hover:bg-white/5"
               }`}
             >
               <tab.icon className="w-4 h-4" />
-              {tab.label}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>

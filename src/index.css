@@ -57,11 +57,20 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    @apply text-foreground antialiased selection:bg-primary/30;
     font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
     direction: rtl;
     min-height: 100vh;
     overflow-x: hidden;
+    background: #192571;
+    background-image: 
+      radial-gradient(at 0% 0%, #1a2866 0, transparent 50%),
+      radial-gradient(at 50% 0%, #2835a3 0, transparent 50%),
+      radial-gradient(at 100% 0%, #000066 0, transparent 50%),
+      radial-gradient(at 0% 100%, #4f1f8e 0, transparent 50%),
+      radial-gradient(at 100% 100%, #192571 0, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
   }
 
   h1 { @apply text-4xl sm:text-5xl font-bold tracking-tight mb-8 text-white font-rubik; }
@@ -81,16 +90,8 @@
 
 @layer components {
   .bg-gradient-main {
-    background: #192571;
-    background-image: 
-      radial-gradient(at 0% 0%, #1a2866 0, transparent 50%),
-      radial-gradient(at 50% 0%, #2835a3 0, transparent 50%),
-      radial-gradient(at 100% 0%, #000066 0, transparent 50%),
-      radial-gradient(at 0% 100%, #4f1f8e 0, transparent 50%),
-      radial-gradient(at 100% 100%, #192571 0, transparent 50%);
-    background-attachment: fixed;
-    position: relative;
-    min-height: 100vh;
+    @apply relative min-h-screen w-full;
+    /* Removed background-image from here to avoid layering conflicts with body */
   }
 
   .glass-card {

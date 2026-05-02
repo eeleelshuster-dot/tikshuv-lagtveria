@@ -369,88 +369,90 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <div className="glass-card overflow-hidden border-white/5 shadow-2xl">
-              <table className="w-full text-right border-collapse">
-                <thead>
-                  <tr className="bg-white/5 border-b border-white/10">
-                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_id"] || "זיהוי פנייה"}</th>
-                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_user_dept"] || "פונה ומדור"}</th>
-                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_status_change"] || "סטטוס טיפול"}</th>
-                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_technician_assign"] || "גורם משויך"}</th>
-                    <th className="p-6"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {filtered.map((ticket) => (
-                    <tr 
-                      key={ticket.id} 
-                      onClick={() => openTicketDetail(ticket)}
-                      className={`group hover:bg-white/[0.04] transition-all cursor-pointer ${updatingTicketId === ticket.id ? 'opacity-50 pointer-events-none' : ''}`}
-                    >
-                      <td className="p-6">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg w-fit group-hover:shadow-glow-primary transition-all">
-                            {ticket.ticket_number}
-                          </span>
-                          <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">{formatDate(ticket.created_at)}</span>
-                        </div>
-                      </td>
-                      <td className="p-6">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-white text-base">{ticket.full_name}</span>
-                          <span className="text-xs text-white/40 font-assistant">{ticket.department || "ללא שיוך מדורי"}</span>
-                        </div>
-                      </td>
-                      <td className="p-6" onClick={(e) => e.stopPropagation()}>
-                        <Select 
-                          value={ticket.status} 
-                          onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
+              <div className="overflow-x-auto scrollbar-thin">
+                <div className="min-w-[800px]">
+                  <table className="w-full text-right border-collapse">
+                    <thead>
+                      <tr className="bg-white/5 border-b border-white/10">
+                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_id"] || "זיהוי פנייה"}</th>
+                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_user_dept"] || "פונה ומדור"}</th>
+                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_status_change"] || "סטטוס טיפול"}</th>
+                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_technician_assign"] || "גורם משויך"}</th>
+                        <th className="p-6"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {filtered.map((ticket) => (
+                        <tr 
+                          key={ticket.id} 
+                          onClick={() => openTicketDetail(ticket)}
+                          className={`group hover:bg-white/[0.04] transition-all cursor-pointer ${updatingTicketId === ticket.id ? 'opacity-50 pointer-events-none' : ''}`}
                         >
-                          <SelectTrigger className="h-11 w-[160px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-card border-white/10 rounded-xl">
-                            <SelectItem value="sent" className="font-bold text-status-sent focus:bg-status-sent/10">נשלח</SelectItem>
-                            <SelectItem value="in_progress" className="font-bold text-status-progress focus:bg-status-progress/10">בטיפול המדור</SelectItem>
-                            <SelectItem value="forwarded" className="font-bold text-accent-gold focus:bg-accent-gold/10">הועבר לגורם אחר</SelectItem>
-                            <SelectItem value="resolved" className="font-bold text-status-resolved focus:bg-status-resolved/10">טופל במלואו</SelectItem>
-                            <SelectItem value="closed" className="font-bold text-white/40 focus:bg-white/5">סגור / ארכיון</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="p-6" onClick={(e) => e.stopPropagation()}>
-                        <Select 
-                          value={ticket.assignee_id || "none"} 
-                          onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
-                        >
-                          <SelectTrigger className="h-11 w-[180px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
-                            <div className="flex items-center gap-2">
-                              <LucideIcons.UserCheck className="w-3.5 h-3.5 text-primary/60" />
-                              <SelectValue />
+                          <td className="p-6">
+                            <div className="flex flex-col gap-1">
+                              <span className="font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg w-fit group-hover:shadow-glow-primary transition-all">
+                                {ticket.ticket_number}
+                              </span>
+                              <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">{formatDate(ticket.created_at)}</span>
                             </div>
-                          </SelectTrigger>
-                          <SelectContent className="bg-card border-white/10 rounded-xl">
-                            <SelectItem value="none" className="italic text-white/40">ללא גורם משויך</SelectItem>
-                            {staffList.map((s) => (
-                              <SelectItem key={s.id} value={s.id} className="font-bold">{s.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="p-6 text-left">
-                        <LucideIcons.ChevronLeft className="w-5 h-5 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-[-4px]" />
-                      </td>
-                    </tr>
-                  ))}
-                  {filtered.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="p-24 text-center">
-                        <LucideIcons.DatabaseBackup className="w-16 h-16 text-white/5 mx-auto mb-6" />
-                        <p className="text-white/30 font-assistant text-xl italic">{content["admin_dashboard_no_tickets"] || "לא נמצאו פניות תואמות במערכת"}</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="p-6">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-white text-base">{ticket.full_name}</span>
+                              <span className="text-xs text-white/40 font-assistant">{ticket.department || "ללא שיוך מדורי"}</span>
+                            </div>
+                          </td>
+                          <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                            <Select 
+                              value={ticket.status} 
+                              onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
+                            >
+                              <SelectTrigger className="h-11 w-[160px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-card border-white/10 rounded-xl">
+                                <SelectItem value="sent" className="font-bold text-status-sent focus:bg-status-sent/10">נשלח</SelectItem>
+                                <SelectItem value="in_progress" className="font-bold text-status-progress focus:bg-status-progress/10">בטיפול המדור</SelectItem>
+                                <SelectItem value="forwarded" className="font-bold text-accent-gold focus:bg-accent-gold/10">הועבר לגורם אחר</SelectItem>
+                                <SelectItem value="resolved" className="font-bold text-status-resolved focus:bg-status-resolved/10">טופל במלואו</SelectItem>
+                                <SelectItem value="closed" className="font-bold text-white/40 focus:bg-white/5">סגור / ארכיון</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                            <Select 
+                              value={ticket.assignee_id || "none"} 
+                              onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
+                            >
+                              <SelectTrigger className="h-11 w-[180px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
+                                <div className="flex items-center gap-2">
+                                  <LucideIcons.UserCheck className="w-3.5 h-3.5 text-primary/60" />
+                                  <SelectValue />
+                                </div>
+                              </SelectTrigger>
+                              <SelectContent className="bg-card border-white/10 rounded-xl">
+                                <SelectItem value="none" className="italic text-white/40">ללא גורם משויך</SelectItem>
+                                {staffList.map((s) => (
+                                  <SelectItem key={s.id} value={s.id} className="font-bold">{s.full_name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="p-6 text-left">
+                            <LucideIcons.ChevronLeft className="w-5 h-5 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-[-4px]" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {filtered.length === 0 && (
+                <div className="p-24 text-center">
+                  <LucideIcons.DatabaseBackup className="w-16 h-16 text-white/5 mx-auto mb-6" />
+                  <p className="text-white/30 font-assistant text-xl italic">{content["admin_dashboard_no_tickets"] || "לא נמצאו פניות תואמות במערכת"}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
