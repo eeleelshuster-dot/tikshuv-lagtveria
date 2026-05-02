@@ -42,7 +42,10 @@ const DebugTracePage = () => {
                 <Button 
                   variant="outline" 
                   className={`w-full h-14 justify-between font-bold font-assistant rounded-xl border-white/10 bg-white/5 ${!dateFilter && "text-white/30"}`}
-                  onClick={() => console.log("[DebugTrace] Calendar Trigger Clicked")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("[DebugTrace] Calendar Trigger Clicked");
+                  }}
                 >
                   <span>{dateFilter ? format(dateFilter, "PPP", { locale: he }) : "בחר תאריך יעד"}</span>
                   <CalendarIcon className="h-5 w-5 text-primary opacity-80" />
@@ -52,10 +55,12 @@ const DebugTracePage = () => {
                 className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[9999]" 
                 align="center"
                 onPointerDownOutside={(e) => {
-                  console.log("[DebugTrace] Popover PointerDownOutside! Target:", e.target);
+                  console.log("[DebugTrace] Popover PointerDownOutside - Prevented default");
+                  e.preventDefault();
                 }}
                 onInteractOutside={(e) => {
-                  console.log("[DebugTrace] Popover InteractOutside! Target:", e.target);
+                  console.log("[DebugTrace] Popover InteractOutside - Prevented default");
+                  e.preventDefault();
                 }}
               >
                 <Calendar
