@@ -4,175 +4,178 @@
 
 @layer base {
   :root {
-    /* Deep navy background */
-    --background: 230 42% 17%;
+    /* Deep navy background with subtle tint */
+    --background: 230 45% 12%;
     --foreground: 0 0% 100%;
 
-    /* Cards - dark purple-navy blend */
-    --card: 240 45% 24%;
+    /* Cards - Elegant translucent depth */
+    --card: 235 45% 18%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 210 20% 96%;
-    --popover-foreground: 220 43% 11%;
+    --popover: 230 45% 15%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Primary - More saturated teal */
-    --primary: 191 100% 30%;
+    /* Primary - Vibrant, high-contrast cyan/teal */
+    --primary: 191 100% 42%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 191 100% 35%;
-    --primary-active: 191 100% 25%;
+    --primary-hover: 191 100% 48%;
+    --primary-active: 191 100% 35%;
 
-    /* Secondary - Lighter card contrast */
-    --secondary: 230 42% 25%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Deep slate blue for subtle contrast */
+    --secondary: 230 35% 22%;
+    --secondary-foreground: 0 0% 95%;
 
-    /* Muted */
-    --muted: 230 42% 20%;
-    --muted-foreground: 230 15% 70%;
+    /* Muted - For background elements and helper text */
+    --muted: 230 35% 18%;
+    --muted-foreground: 230 15% 75%;
 
-    /* Accent - Vibrant electric indigo & cyan mix */
-    --accent: 191 100% 45%;
+    /* Accent - Electric indigo for highlights */
+    --accent: 253 98% 55%;
     --accent-foreground: 0 0% 100%;
     
-    /* Extra accent for depth */
-    --accent-gold: 38 92% 55%;
-    --accent-cyan: 180 100% 50%;
+    /* Complementary accents */
+    --accent-gold: 38 100% 55%;
+    --accent-emerald: 155 100% 45%;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders & inputs - lighter for visibility on dark cards */
-    --border: 240 30% 35%;
-    --input: 0 0% 100%;
-    --ring: 191 100% 21%;
+    /* Borders & inputs - optimized for dark mode legibility */
+    --border: 235 30% 28%;
+    --input: 230 45% 12%;
+    --ring: 191 100% 42%;
 
     --radius: 0.75rem;
     --radius-card: 1.25rem;
 
-    /* Sidebar */
-    --sidebar-background: 230 42% 17%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 191 100% 21%;
+    /* Sidebar - Integrated with main theme */
+    --sidebar-background: 230 45% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 191 100% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 253 98% 51%;
+    --sidebar-accent: 253 98% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 191 100% 21%;
+    --sidebar-border: 230 30% 20%;
+    --sidebar-ring: 191 100% 42%;
 
-    /* Custom tokens */
+    /* Advanced Shadow Tokens */
+    --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(0, 0, 0, 0.3);
+    --shadow-glow-primary: 0 0 20px -5px hsla(191, 100%, 42%, 0.4);
 
-    --focus-ring-inner: 0 0 0 2px hsl(191, 100%, 21%);
-    --focus-ring-outer: 0 0 0 4px hsl(253, 98%, 51%);
-    --card-shadow: 0 4px 20px -2px hsla(253, 98%, 51%, 0.15), 0 0 40px -10px hsla(191, 100%, 21%, 0.08), 0 2px 8px rgba(0, 0, 0, 0.3);
-    --card-shadow-hover: 0 8px 30px -2px hsla(253, 98%, 51%, 0.25), 0 0 50px -10px hsla(191, 100%, 21%, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4);
-
-    /* Improved multi-depth blurred gradient background */
-    --gradient-bg: linear-gradient(160deg, hsl(230, 42%, 12%) 0%, hsl(235, 50%, 18%) 25%, hsl(240, 42%, 22%) 50%, hsl(250, 55%, 17%) 75%, hsl(230, 42%, 12%) 100%);
-    --gradient-radial: 
-      radial-gradient(ellipse 1600px 900px at 75% 10%, hsla(253, 98%, 55%, 0.22), transparent 55%),
-      radial-gradient(ellipse 1000px 700px at 15% 85%, hsla(191, 100%, 25%, 0.18), transparent 50%),
-      radial-gradient(ellipse 700px 500px at 50% 50%, hsla(240, 60%, 32%, 0.12), transparent 60%),
-      radial-gradient(ellipse 400px 300px at 85% 75%, hsla(253, 80%, 40%, 0.08), transparent 60%);
-
-    /* Input text - #111827 */
-    --input-text: 222 39% 11%;
-
-    /* Status colors - WCAG friendly */
-    --status-sent: 25 95% 60%;
-    --status-in-progress: 210 100% 60%;
-    --status-resolved: 142 76% 50%;
-    --status-closed: 230 15% 55%;
+    /* Background Gradients */
+    --gradient-bg: linear-gradient(165deg, hsl(230, 45%, 8%) 0%, hsl(235, 45%, 15%) 40%, hsl(245, 40%, 18%) 70%, hsl(230, 45%, 10%) 100%);
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    /* Input Specifics */
+    --input-text: 0 0% 100%;
+    --input-placeholder: 230 15% 55%;
+
+    /* Status System - WCAG compliant & high saturation */
+    --status-sent: 25 100% 60%;
+    --status-in-progress: 200 100% 60%;
+    --status-resolved: 145 80% 50%;
+    --status-closed: 230 15% 60%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-none;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30;
     font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
     direction: rtl;
     min-height: 100vh;
+    letter-spacing: -0.01em;
   }
 
-  h1, h2, h3, h4, h5, h6, button {
-    font-family: 'Rubik', 'Assistant', system-ui, sans-serif;
-  }
-
+  /* Refined Typography Hierarchy */
+  h1 { @apply text-4xl sm:text-5xl font-bold tracking-tight mb-8 text-white; font-family: 'Rubik', sans-serif; }
+  h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight mb-6 text-white/90; font-family: 'Rubik', sans-serif; }
+  h3 { @apply text-xl font-medium mb-4 text-white/80; font-family: 'Rubik', sans-serif; }
+  
+  p, span, label { @apply leading-relaxed; }
+  
   .font-mono-ticket {
-    font-family: 'Roboto Mono', monospace;
+    @apply font-mono tracking-wider;
   }
 
+  /* Complex Blurred Gradient Background */
   .bg-gradient-main {
     background: var(--gradient-bg);
     position: relative;
+    overflow-x: hidden;
   }
 
   .bg-gradient-main::before {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--gradient-radial);
-    backdrop-filter: blur(0px);
-    pointer-events: none;
-  }
-
-  .bg-gradient-main::after {
-    content: '';
-    position: absolute;
+    position: fixed;
     inset: 0;
     background: 
-      radial-gradient(ellipse 600px 600px at 70% 25%, hsla(253, 98%, 55%, 0.09), transparent 65%),
-      radial-gradient(ellipse 500px 400px at 25% 70%, hsla(191, 100%, 35%, 0.08), transparent 60%),
-      radial-gradient(ellipse 350px 250px at 90% 80%, hsla(200, 80%, 40%, 0.05), transparent 70%);
-    filter: blur(50px);
+      radial-gradient(circle at 80% 10%, hsla(253, 98%, 55%, 0.15), transparent 45%),
+      radial-gradient(circle at 15% 85%, hsla(191, 100%, 42%, 0.12), transparent 40%),
+      radial-gradient(circle at 50% 50%, hsla(240, 50%, 25%, 0.1), transparent 60%);
+    filter: blur(80px);
     pointer-events: none;
+    z-index: 0;
   }
 
-  .card-hover {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .card-hover:hover {
-    box-shadow: var(--shadow-premium) !important;
-    transform: translateY(-2px) scale(1.005);
-    border-color: hsla(var(--primary), 0.4);
-  }
-  
-  .btn-transition {
-    transition: all 0.2s ease;
-  }
-  
-  .btn-transition:active {
-    transform: scale(0.97);
-  }
-
-  /* Typography Refinement */
-  h1 { @apply text-4xl font-bold tracking-tight mb-6; }
-  h2 { @apply text-2xl font-semibold tracking-tight mb-4; }
-  h3 { @apply text-xl font-medium mb-3; }
-  p { @apply leading-relaxed; }
-
-  /* Premium Card base */
+  /* Glassmorphism Components */
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/40 shadow-premium rounded-[var(--radius-card)];
+    @apply bg-card/40 backdrop-blur-2xl border border-white/10 shadow-premium rounded-2xl transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply border-white/20 bg-card/50;
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
   }
 
-  /* Darken input text for visibility */
-  input, textarea, select {
-    color: hsl(var(--input-text)) !important;
+  .glass-input {
+    @apply bg-white/5 border border-white/10 rounded-xl px-4 h-12 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-200 outline-none;
   }
 
-  input::placeholder, textarea::placeholder {
-    color: hsl(215 16% 55%) !important;
+  /* Button Styles & Transitions */
+  .btn-primary {
+    @apply bg-primary text-white font-bold rounded-xl px-6 py-3 shadow-glow-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white font-medium rounded-xl px-6 py-3 border border-white/5 hover:bg-secondary/80 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2;
+  }
+
+  /* Micro-interactions */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .interactive-glow:hover {
+    box-shadow: 0 0 15px hsla(var(--primary), 0.3);
+  }
+
+  /* Scrollbar refinement */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+  }
+
+  /* Custom Status Badges */
+  .status-dot {
+    @apply w-2.5 h-2.5 rounded-full inline-block mr-2;
   }
 }
+
+/* Animations Layer */
+@layer utilities {
+  .animate-stagger-1 { animation-delay: 100ms; }
+  .animate-stagger-2 { animation-delay: 200ms; }
+  .animate-stagger-3 { animation-delay: 300ms; }
+  .animate-stagger-4 { animation-delay: 400ms; }
+}
+

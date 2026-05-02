@@ -75,6 +75,13 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "1rem",
+        "2xl": "1.5rem",
+      },
+      boxShadow: {
+        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'premium-hover': '0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 8px 12px -4px rgba(0, 0, 0, 0.1)',
+        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
       },
       keyframes: {
         "accordion-down": {
@@ -89,13 +96,24 @@ export default {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
+        "fade-in": "fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "slide-up": "slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        "pulse-soft": "pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+

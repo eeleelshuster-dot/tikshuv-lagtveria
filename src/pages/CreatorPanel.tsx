@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Settings, Users, LayoutDashboard, Database, History, Download, Upload } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserManagement } from "@/components/creator/UserManagement";
 import { ContentManagement } from "@/components/creator/ContentManagement";
-import { HistoryManagement } from "@/components/creator/HistoryManagement";
 import { useContent } from "@/contexts/ContentContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +13,7 @@ const CreatorPanel = () => {
   const { session } = useAuth();
   const { content, refreshContent } = useContent();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"users" | "content" | "import" | "history">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "content" | "import">("users");
 
   const handleExport = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
@@ -59,78 +58,87 @@ const CreatorPanel = () => {
   };
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-6">
-      <div className="relative z-10 max-w-5xl mx-auto animate-fade-in">
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="font-rubik text-2xl sm:text-3xl font-bold text-foreground">לוח יוצר מערכת (Creator Panel)</h1>
-            <p className="text-muted-foreground font-assistant mt-1">ניהול מתקדם, משתמשים ותוכן מערכת</p>
+    <div className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
+      <div className="max-w-6xl mx-auto space-y-10 animate-fade-in">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-bold font-rubik text-white tracking-tight flex items-center gap-3">
+              <LucideIcons.ShieldAlert className="w-9 h-9 text-primary shadow-glow-primary" />
+              פאנל יוצר מערכת
+            </h1>
+            <p className="text-white/40 font-assistant text-xl">ניהול מתקדם, הרשאות על ותוכן דינמי</p>
           </div>
-          <Button asChild variant="outline" className="flex-row-reverse border-border">
-            <Link to="/admin">
-              <span>מעבר ללוח מנהל</span>
-              <LayoutDashboard className="mr-2 w-4 h-4" />
+          <Button asChild variant="outline" className="h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-xl px-6">
+            <Link to="/admin" className="flex items-center gap-2">
+              <LucideIcons.LayoutDashboard className="w-4 h-4" />
+              <span>חזרה ללוח מנהל</span>
             </Link>
           </Button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-border/50 mb-6 overflow-x-auto">
-          <button 
-            onClick={() => setActiveTab("users")}
-            className={`flex items-center gap-2 px-6 py-3 font-rubik text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === "users" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <Users className="w-4 h-4" />
-            ניהול משתמשים
-          </button>
-          <button 
-            onClick={() => setActiveTab("content")}
-            className={`flex items-center gap-2 px-6 py-3 font-rubik text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === "content" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <Settings className="w-4 h-4" />
-            ניהול תוכן ועיצוב (CMS)
-          </button>
-          <button 
-            onClick={() => setActiveTab("history")}
-            className={`flex items-center gap-2 px-6 py-3 font-rubik text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <History className="w-4 h-4" />
-            היסטוריית שינויים
-          </button>
-          <button 
-            onClick={() => setActiveTab("import")}
-            className={`flex items-center gap-2 px-6 py-3 font-rubik text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === "import" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <Database className="w-4 h-4" />
-            גיבוי וייבוא נתונים
-          </button>
+        {/* Custom Tabs */}
+        <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md w-fit">
+          {[
+            { id: 'users', label: 'ניהול משתמשים', icon: LucideIcons.Users },
+            { id: 'content', label: 'ניהול תוכן (CMS)', icon: LucideIcons.Settings },
+            { id: 'import', label: 'גיבוי ונתונים', icon: LucideIcons.Database },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-rubik font-bold text-sm transition-all ${
+                activeTab === tab.id 
+                ? "bg-primary text-white shadow-glow-primary" 
+                : "text-white/40 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-          {activeTab === "users" && <UserManagement session={session} />}
+        {/* Tab Content Container */}
+        <div className="animate-slide-up">
+          {activeTab === "users" && (
+            <div className="glass-card p-8 border-white/5">
+              <UserManagement session={session} />
+            </div>
+          )}
           
-          {activeTab === "content" && <ContentManagement />}
-
-          {activeTab === "history" && <HistoryManagement />}
+          {activeTab === "content" && (
+            <div className="glass-card p-8 border-white/5">
+              <ContentManagement />
+            </div>
+          )}
 
           {activeTab === "import" && (
-            <div className="bg-card p-8 rounded-lg shadow border border-border text-center space-y-6">
-              <Database className="w-12 h-12 text-muted-foreground mx-auto opacity-50" />
-              <div>
-                <h3 className="font-rubik text-xl text-card-foreground">ניהול נתוני מערכת</h3>
-                <p className="text-muted-foreground font-assistant mt-2">ייצוא וייבוא מהיר למילון הטקסטים והעיצובים ברמת המערכת.</p>
+            <div className="glass-card p-12 text-center max-w-3xl mx-auto space-y-8 border-white/10 shadow-2xl">
+              <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary group-hover:scale-110 transition-transform">
+                <LucideIcons.Database className="w-10 h-10" />
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <Button onClick={handleExport} variant="outline" className="flex-row-reverse gap-2 h-12 px-8">
-                  <Download className="w-4 h-4" />
-                  ייצוא כל הנתונים (JSON)
+              <div className="space-y-2">
+                <h3 className="font-rubik text-2xl font-bold text-white">ארכיון ונתוני מערכת</h3>
+                <p className="text-white/40 font-assistant text-lg max-w-md mx-auto">ייצוא וייבוא מהיר של מילון הטקסטים והגדרות העיצוב לגיבוי או העברה.</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <Button 
+                  onClick={handleExport} 
+                  className="btn-primary h-14 rounded-2xl text-lg flex items-center justify-center gap-3"
+                >
+                  <LucideIcons.Download className="w-5 h-5" />
+                  ייצוא נתונים (JSON)
                 </Button>
                 
-                <div className="relative">
-                   <Button variant="outline" className="flex-row-reverse gap-2 h-12 px-8 w-full">
-                    <Upload className="w-4 h-4" />
+                <div className="relative group">
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-14 rounded-2xl text-lg border-white/10 bg-white/5 hover:bg-white/10 text-white flex items-center justify-center gap-3"
+                  >
+                    <LucideIcons.Upload className="w-5 h-5" />
                     ייבוא קובץ נתונים
                   </Button>
                   <input 
@@ -142,16 +150,20 @@ const CreatorPanel = () => {
                 </div>
               </div>
               
-              <p className="text-[10px] text-muted-foreground">מומלץ לבצע גיבוי לפני כל שינוי משמעותי במערכת.</p>
+              <div className="flex items-center justify-center gap-2 text-xs font-bold text-white/20 uppercase tracking-[0.2em] pt-4">
+                <LucideIcons.ShieldAlert className="w-4 h-4 text-accent-gold/40" />
+                מומלץ לבצע גיבוי לפני כל שינוי משמעותי במערכת
+              </div>
             </div>
           )}
         </div>
 
-        <div className="text-center mt-12">
-          <Button asChild variant="ghost" className="text-foreground/70 hover:text-foreground">
-            <Link to="/">
-              <ArrowRight className="ml-2" />
-              חזרה לדף הבית
+        {/* Footer Navigation */}
+        <div className="flex justify-center pt-8 border-t border-white/5">
+          <Button asChild variant="ghost" className="text-white/30 hover:text-white rounded-xl transition-all">
+            <Link to="/" className="flex items-center gap-2">
+              <LucideIcons.ArrowRight className="w-4 h-4" />
+              <span>חזרה לדף הבית</span>
             </Link>
           </Button>
         </div>
@@ -161,3 +173,4 @@ const CreatorPanel = () => {
 };
 
 export default CreatorPanel;
+

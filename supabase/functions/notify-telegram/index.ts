@@ -31,22 +31,29 @@ Deno.serve(async (req) => {
     let message = "";
 
     if (alert_type === "ticket_creation") {
-      const { ticket_number, full_name, description } = payload;
+      const { ticket_number, full_name, description, department } = payload;
       console.log(`[notify-telegram] Ticket notification for ${ticket_number}`);
       message =
-        `🎫 <b>פנייה חדשה!</b>\n\n` +
-        `<b>מספר פנייה:</b> ${ticket_number}\n` +
-        `<b>שם:</b> ${full_name}\n` +
-        `<b>תיאור:</b> ${description || "ללא תיאור"}\n`;
+        `🎫 <b>פנייה חדשה התקבלה במערכת</b>\n` +
+        `────────────────────\n` +
+        `🆔 <b>מספר פנייה:</b> <code>${ticket_number}</code>\n` +
+        `👤 <b>שם הפונה:</b> ${full_name}\n` +
+        `🏢 <b>מדור:</b> ${department || "לא צוין"}\n\n` +
+        `📝 <b>תיאור הפנייה:</b>\n${description || "ללא תיאור"}\n` +
+        `────────────────────\n` +
+        `📅 <b>זמן פתיחה:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}`;
     } else if (alert_type === "system_error") {
       const component = payload.component || "unknown";
       const error_msg = payload.error_message || "Unknown Error";
       console.log(`[notify-telegram] System error alert for component: ${component}`);
       message =
-        `🚨 <b>שגיאת מערכת!</b>\n\n` +
-        `<b>רכיב:</b> ${component}\n` +
-        `<b>שגיאה:</b> ${error_msg}\n` +
-        `<b>זמן:</b> ${new Date().toISOString()}\n`;
+        `🚨 <b>התראת שגיאת מערכת קריטית</b>\n` +
+        `────────────────────\n` +
+        `🔧 <b>רכיב:</b> <code>${component}</code>\n` +
+        `❌ <b>שגיאה:</b> <code>${error_msg}</code>\n` +
+        `────────────────────\n` +
+        `⏰ <b>זמן אירוע:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}\n` +
+        `⚠️ <i>יש לבדוק את יומני הרישום של Supabase Edge Functions.</i>`;
     } else {
       throw new Error(`Unsupported alert_type: ${alert_type}`);
     }

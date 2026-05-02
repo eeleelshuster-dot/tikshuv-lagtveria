@@ -185,35 +185,48 @@ const OpenTicket = () => {
 
   if (submitted) {
     return (
-      <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4">
-        <div className="relative z-10 w-full max-w-md animate-fade-in text-center">
-          <div className="bg-card rounded-lg p-8 shadow-lg border border-border">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <LucideIcons.Send className="w-8 h-8 text-primary" />
+      <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-12">
+        <div className="relative z-10 w-full max-w-md animate-fade-in text-center space-y-8">
+          <div className="glass-card p-10 border-white/10 shadow-2xl space-y-6">
+            <div className="w-20 h-20 bg-primary/20 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-glow-primary animate-pulse">
+              <LucideIcons.Send className="w-10 h-10" />
             </div>
-            <h2 className="font-rubik text-xl font-bold text-card-foreground mb-2">{content["msg_ticket_success_title"]}</h2>
-            <p className="text-muted-foreground font-assistant mb-4">{content["msg_ticket_number_label"]}</p>
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <p className="font-mono-ticket text-2xl font-bold text-primary">{ticketNumber}</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={() => {
-                  navigator.clipboard.writeText(ticketNumber);
-                  toast({ title: "הועתק", description: "מספר הפנייה הועתק ללוח" });
-                }}
-                title="העתק מספר פנייה"
-              >
-                <LucideIcons.Copy className="w-4 h-4 text-muted-foreground" />
-              </Button>
+            
+            <div className="space-y-2">
+              <h2 className="font-rubik text-3xl font-bold text-white leading-tight">
+                {content["msg_ticket_success_title"]}
+              </h2>
+              <p className="text-white/40 font-assistant text-lg">
+                {content["msg_ticket_number_label"]}
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">{content["msg_ticket_success_save_number"]}</p>
+
+            <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
+              <div className="flex items-center justify-center gap-4">
+                <p className="font-mono text-4xl font-bold text-primary tracking-tighter">{ticketNumber}</p>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-12 w-12 rounded-xl hover:bg-white/10 text-white/40 hover:text-white transition-all" 
+                  onClick={() => {
+                    navigator.clipboard.writeText(ticketNumber);
+                    toast({ title: "הועתק", description: "מספר הפנייה הועתק ללוח" });
+                  }}
+                  title="העתק מספר פנייה"
+                >
+                  <LucideIcons.Copy className="w-6 h-6" />
+                </Button>
+              </div>
+              <p className="text-xs text-white/30 font-assistant leading-relaxed">
+                {content["msg_ticket_success_save_number"]}
+              </p>
+            </div>
           </div>
-          <Button asChild variant="ghost" className="mt-6 text-foreground/70 hover:text-foreground">
-            <Link to="/">
-              <LucideIcons.ArrowRight className="ml-2" />
-              חזרה לדף הבית
+
+          <Button asChild variant="ghost" className="text-white/30 hover:text-white rounded-xl h-12 px-8">
+            <Link to="/" className="flex items-center gap-2">
+              <LucideIcons.ArrowRight className="w-4 h-4" />
+              <span>חזרה לדף הבית</span>
             </Link>
           </Button>
         </div>
@@ -222,142 +235,153 @@ const OpenTicket = () => {
   }
 
   return (
-    <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="relative z-10 w-full max-w-lg animate-fade-in">
-        <h1 className="text-3xl md:text-4xl font-rubik font-bold text-center mb-6 text-foreground">
-          {content["open_ticket_title"]}
-        </h1>
-        {content["open_ticket_subtitle"] && (
-           <p className="text-muted-foreground font-assistant text-center mb-8 text-lg">
-            {content["open_ticket_subtitle"]}
-          </p>
-        )}
-
-        <div className="glass-card p-6 sm:p-10 space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Full Name */}
-          <div>
-            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_fullname")}`}>
-              {content["label_fullname"]} *
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => handleChange("fullName", e.target.value)}
-                onBlur={() => handleBlur("fullName")}
-                className={fieldClass("fullName")}
-                placeholder={content["placeholder_fullname"]}
-              />
-              {isFieldValid("fullName") && <LucideIcons.CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
-            </div>
-            {touched.fullName && errors.fullName && (
-              <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
-                <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.fullName}
-              </p>
-            )}
-          </div>
-
-          {/* Department */}
-          <div>
-            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5`}>
-              מדור *
-            </label>
-            <div className="relative">
-              <select
-                value={formData.department}
-                onChange={(e) => handleChange("department", e.target.value)}
-                onBlur={() => handleBlur("department")}
-                className={fieldClass("department")}
-              >
-                <option value="" disabled>בחר מדור</option>
-                {['גיוס','תו״מ','בקרה','ברה״ן','רפואי','פסיכוטכני','פרט','חרדים','קהילה','שלוחת חזון','מל״ג / סמל״ג'].map((dept) => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-              {isFieldValid("department") && <LucideIcons.CheckCircle2 className="absolute left-10 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />}
-            </div>
-            {touched.department && errors.department && (
-              <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
-                <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.department}
-              </p>
-            )}
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_phone")}`}>
-              {content["label_phone"]} *
-            </label>
-            <div className="relative">
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
-                onBlur={() => handleBlur("phone")}
-                className={`${fieldClass("phone")} pl-10`}
-                placeholder={content["placeholder_phone"]}
-                inputMode="tel"
-              />
-              {isFieldValid("phone") && <LucideIcons.CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none bg-input" />}
-            </div>
-            {touched.phone && errors.phone && (
-              <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
-                <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.phone}
-              </p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className={`block font-assistant font-semibold text-card-foreground text-sm mb-1.5 ${getStyle("label_description")}`}>
-              {content["label_description"]} *
-            </label>
-            <div className="relative">
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleChange("description", e.target.value)}
-                onBlur={() => handleBlur("description")}
-                className={`w-full min-h-[100px] px-4 py-3 rounded-md border bg-input font-assistant focus-double-ring transition-all duration-150 resize-y ${touched.description && errors.description ? "border-destructive" : isFieldValid("description") ? "border-primary/50" : "border-border"}`}
-                placeholder={content["placeholder_description"]}
-                maxLength={1000}
-              />
-            </div>
-            {touched.description && errors.description && (
-              <p className="text-destructive text-sm mt-1 font-assistant flex items-center gap-1">
-                <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
-                {errors.description}
-              </p>
-            )}
-          </div>
-
-
-
-          <p className="text-xs text-muted-foreground font-assistant text-center py-2">
-            המידע מוגן ולא יועבר לצד שלישי. משמש אך ורק לצורך טיפול בפנייה.
-          </p>
-
-          {globalError && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm font-assistant flex items-start gap-2">
-              <LucideIcons.AlertTriangle className="w-5 h-5 shrink-0" />
-              <p>{globalError}</p>
-            </div>
+    <div className="bg-gradient-main min-h-screen px-4 py-12 flex items-center justify-center">
+      <div className="relative z-10 w-full max-w-xl animate-fade-in space-y-8">
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl sm:text-5xl font-rubik font-bold text-white tracking-tight">
+            {content["open_ticket_title"]}
+          </h1>
+          {content["open_ticket_subtitle"] && (
+             <p className="text-white/40 font-assistant text-lg sm:text-xl">
+              {content["open_ticket_subtitle"]}
+            </p>
           )}
-
-          <Button type="submit" size="xl" className="w-full flex-row-reverse mt-4 bg-primary hover:bg-primary/90 text-white shadow-premium h-14" disabled={submitting}>
-            <span className="font-bold text-lg">{submitting ? content["msg_submitting"] : content["btn_submit_ticket"]}</span>
-            {renderIcon(getContentProps("btn_submit_ticket").icon, <LucideIcons.Send className="mr-2 w-5 h-5" />)}
-          </Button>
-        </form>
         </div>
 
-        <div className="text-center mt-6">
-          <Button asChild variant="ghost" className="text-foreground/70 hover:text-foreground">
-            <Link to="/">
-              <LucideIcons.ArrowRight className="ml-2" />
+        <div className="glass-card p-8 sm:p-12 space-y-8 border-white/10 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Full Name */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest block px-1">
+                {content["label_fullname"]} *
+              </label>
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => handleChange("fullName", e.target.value)}
+                  onBlur={() => handleBlur("fullName")}
+                  className={`glass-input h-14 w-full pr-12 rounded-xl transition-all ${touched.fullName && errors.fullName ? 'border-destructive/50' : ''}`}
+                  placeholder={content["placeholder_fullname"]}
+                />
+                <LucideIcons.User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-primary transition-colors" />
+                {isFieldValid("fullName") && <LucideIcons.CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />}
+              </div>
+              {touched.fullName && errors.fullName && (
+                <p className="text-destructive text-xs font-bold flex items-center gap-1.5 px-1">
+                  <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
+                  {errors.fullName}
+                </p>
+              )}
+            </div>
+
+            {/* Department */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest block px-1">
+                מדור רלוונטי *
+              </label>
+              <div className="relative group">
+                <select
+                  value={formData.department}
+                  onChange={(e) => handleChange("department", e.target.value)}
+                  onBlur={() => handleBlur("department")}
+                  className={`glass-input h-14 w-full pr-12 rounded-xl appearance-none transition-all ${touched.department && errors.department ? 'border-destructive/50' : ''}`}
+                >
+                  <option value="" disabled className="bg-card">בחר מדור מהרשימה</option>
+                  {['גיוס','תו״מ','בקרה','ברה״ן','רפואי','פסיכוטכני','פרט','חרדים','קהילה','שלוחת חזון','מל״ג / סמל״ג'].map((dept) => (
+                    <option key={dept} value={dept} className="bg-card">{dept}</option>
+                  ))}
+                </select>
+                <LucideIcons.Building2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-primary transition-colors pointer-events-none" />
+                <LucideIcons.ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+              </div>
+              {touched.department && errors.department && (
+                <p className="text-destructive text-xs font-bold flex items-center gap-1.5 px-1">
+                  <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
+                  {errors.department}
+                </p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest block px-1">
+                {content["label_phone"]} *
+              </label>
+              <div className="relative group">
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                  onBlur={() => handleBlur("phone")}
+                  className={`glass-input h-14 w-full pr-12 rounded-xl transition-all ${touched.phone && errors.phone ? 'border-destructive/50' : ''}`}
+                  placeholder={content["placeholder_phone"]}
+                  inputMode="tel"
+                />
+                <LucideIcons.Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-primary transition-colors" />
+                {isFieldValid("phone") && <LucideIcons.CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />}
+              </div>
+              {touched.phone && errors.phone && (
+                <p className="text-destructive text-xs font-bold flex items-center gap-1.5 px-1">
+                  <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
+                  {errors.phone}
+                </p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest block px-1">
+                {content["label_description"]} *
+              </label>
+              <div className="relative group">
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  onBlur={() => handleBlur("description")}
+                  className={`glass-input min-h-[140px] w-full pr-12 py-4 rounded-xl transition-all resize-none ${touched.description && errors.description ? 'border-destructive/50' : ''}`}
+                  placeholder={content["placeholder_description"]}
+                  maxLength={1000}
+                />
+                <LucideIcons.MessageSquare className="absolute right-4 top-4 w-5 h-5 text-white/20 group-focus-within:text-primary transition-colors" />
+              </div>
+              {touched.description && errors.description && (
+                <p className="text-destructive text-xs font-bold flex items-center gap-1.5 px-1">
+                  <LucideIcons.AlertCircle className="w-3.5 h-3.5" />
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+              <LucideIcons.ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+              <p className="text-[10px] text-white/30 font-assistant leading-relaxed uppercase tracking-wider">
+                המידע מוגן ומאובטח ברמת הצפנה ממשלתית. משמש לטיפול בפנייה בלבד.
+              </p>
+            </div>
+
+            {globalError && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-2xl text-destructive text-sm font-bold flex items-start gap-3 animate-pulse">
+                <LucideIcons.AlertTriangle className="w-5 h-5 shrink-0" />
+                <p>{globalError}</p>
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full btn-primary h-16 rounded-2xl text-xl shadow-glow-primary group"
+              disabled={submitting}
+            >
+              <span className="font-bold">{submitting ? content["msg_submitting"] : content["btn_submit_ticket"]}</span>
+              {!submitting && <LucideIcons.Send className="mr-3 w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+            </Button>
+          </form>
+        </div>
+
+        <div className="text-center pt-4">
+          <Button asChild variant="ghost" className="text-white/30 hover:text-white rounded-xl">
+            <Link to="/" className="flex items-center gap-2">
+              <LucideIcons.ArrowRight className="w-4 h-4" />
               {content["btn_back_home"]}
             </Link>
           </Button>
