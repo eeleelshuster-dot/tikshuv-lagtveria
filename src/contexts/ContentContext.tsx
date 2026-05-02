@@ -117,13 +117,11 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const refreshContent = async () => {
-    console.log("[ContentContext] Refreshing content...");
     try {
       const { data, error } = await (supabase.from("app_content" as any) as any).select("key, value_published, placement_rules");
       if (error) {
         console.warn("[ContentContext] Could not load dynamic content. Falling back to defaults.", error);
       } else if (data) {
-        console.log("[ContentContext] Content loaded successfully, keys:", data.length);
         const remoteContent = { ...defaultContent };
         const remoteProps = { ...defaultProps };
         (data as any[]).forEach(item => {

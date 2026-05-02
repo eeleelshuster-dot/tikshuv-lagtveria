@@ -240,23 +240,19 @@ export const FilterPanel = ({
                 <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em] px-1">תאריך פתיחה</label>
                 <Popover 
                   open={isCalendarOpen} 
-                  onOpenChange={(open) => {
-                    console.log("[FilterPanel] Popover onOpenChange:", open);
-                    setIsCalendarOpen(open);
-                  }}
+                  onOpenChange={setIsCalendarOpen}
                 >
                   <PopoverTrigger asChild>
                     <Button 
                       variant="outline" 
                       className={`w-full h-14 justify-between font-bold font-assistant rounded-xl border-white/10 bg-white/5 ${!dateFilter && "text-white/30"}`}
-                      onClick={() => console.log("[FilterPanel] Calendar Button Clicked")}
                     >
                       <span>{dateFilter ? format(dateFilter, "PPP", { locale: he }) : "בחר תאריך יעד"}</span>
                       <CalendarIcon className="h-5 w-5 text-primary opacity-80" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[70]" 
+                    className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[9999]" 
                     align="center"
                   >
                     <Calendar

@@ -15,6 +15,8 @@ import {
   ArrowUp,
   ArrowDown
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const FONT_SIZES = [
   { label: "קטן", value: "text-sm" },

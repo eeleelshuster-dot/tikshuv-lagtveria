@@ -15,8 +15,6 @@ const CreatorPanel = () => {
   const { content, refreshContent } = useContent();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"users" | "content" | "import">("users");
-  
-  console.log("[CreatorPanel] Rendered, activeTab:", activeTab);
 
   const handleExport = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
@@ -90,7 +88,6 @@ const CreatorPanel = () => {
             <button
               key={tab.id}
               onClick={() => {
-                console.log("[CreatorPanel] Tab clicked:", tab.id, "currentRole:", session?.user?.role);
                 setActiveTab(tab.id as any);
               }}
               className={`flex items-center justify-center sm:justify-start gap-3 px-6 py-4 rounded-xl font-rubik font-bold text-sm transition-all pointer-events-auto ${
