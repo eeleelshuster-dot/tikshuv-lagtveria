@@ -67,41 +67,50 @@ export const ContentManagement = () => {
     { name: "פתיחת פנייה", keys: ["open_ticket_title", "open_ticket_subtitle", "label_fullname", "label_id_number", "label_phone", "label_description", "placeholder_fullname", "placeholder_id_number", "placeholder_phone", "placeholder_description", "btn_submit_ticket", "btn_back_home", "msg_submitting", "msg_ticket_success_title", "msg_ticket_number_label", "msg_ticket_success_save_number"] },
     { name: "מעקב פנייה", keys: ["track_ticket_title", "track_ticket_subtitle", "label_ticket_number", "placeholder_ticket_number", "btn_search_ticket", "label_ticket_status", "label_ref_name", "label_ref_description", "label_recent_updates", "msg_no_updates"] },
     { name: "כניסת מנהל וסיסמה", keys: ["admin_login_title", "label_username", "label_password", "placeholder_username", "placeholder_password", "checkbox_remember", "btn_login", "msg_logging_in", "change_password_title", "change_password_subtitle", "label_new_password", "label_confirm_password", "placeholder_new_password", "placeholder_confirm_password", "msg_passwords_match", "btn_save_password", "msg_password_min_length", "msg_passwords_dont_match", "msg_saving"] },
-    { name: "לוח מנהל", keys: ["admin_dashboard_title", "admin_dashboard_search_placeholder", "admin_dashboard_status_all", "admin_dashboard_no_tickets", "label_id", "label_date", "label_description_short", "label_status_change", "label_technician_assign", "label_internal_notes", "label_add_note", "placeholder_internal_note", "msg_new_ticket_toast", "msg_new_ticket_body"] },
+    { name: "לוח מנהל", keys: ["admin_dashboard_title", "admin_dashboard_subtitle", "admin_dashboard_search_placeholder", "admin_dashboard_status_all", "admin_dashboard_no_tickets", "label_id", "label_date", "label_description_short", "label_status_change", "label_technician_assign", "label_internal_notes", "label_add_note", "placeholder_internal_note", "msg_new_ticket_toast", "msg_new_ticket_body"] },
+    { name: "פאנל מפקדים", keys: ["commander_dashboard_title", "commander_dashboard_subtitle", "commander_badge_label", "commander_new_tickets", "commander_in_progress", "commander_waiting_close", "commander_closed_today", "commander_table_num", "commander_table_user", "commander_table_dept", "commander_table_status", "commander_table_date", "commander_no_results", "commander_btn_clear_filters", "commander_sheet_title", "commander_sheet_workflow", "commander_sheet_user_label", "commander_sheet_dept_label", "commander_sheet_assignee_label", "commander_sheet_desc_label", "commander_sheet_history_label", "commander_sheet_no_history", "commander_sheet_btn_confirm", "commander_sheet_confirm_note"] },
     { name: "אחר", keys: ["not_found_title", "not_found_subtitle"] }
   ];
 
   return (
     <div className="space-y-6">
-      <div className="bg-card p-4 rounded-lg shadow border border-border">
-        <h2 className="text-xl font-rubik font-bold text-card-foreground">ניהול תוכן ועיצוב (CMS)</h2>
-        <p className="text-sm font-assistant text-muted-foreground">עריכת טקסטים, גדלים ומיקומים בכל האתר</p>
+      <div className="glass-card p-6 border-white/10 bg-white/5">
+        <h2 className="text-2xl font-rubik font-bold text-white">ניהול תוכן ועיצוב (CMS)</h2>
+        <p className="text-base font-assistant text-white/40">עריכת טקסטים, גדלים ומיקומים בכל האתר</p>
       </div>
 
       {categories.map((cat) => (
-        <div key={cat.name} className="space-y-3">
-          <h3 className="font-rubik font-semibold text-lg text-primary border-b border-border pb-1">{cat.name}</h3>
-          <div className="grid gap-3">
+        <div key={cat.name} className="space-y-4">
+          <h3 className="font-rubik font-bold text-xl text-primary border-b border-white/10 pb-2 flex items-center gap-2">
+            <LucideIcons.Settings2 className="w-5 h-5" />
+            {cat.name}
+          </h3>
+          <div className="grid gap-4">
             {cat.keys.map((key) => {
               const isEditing = editingKey === key;
               const isExpanded = expandedKey === key;
               const props = isEditing ? editProps : getContentProps(key);
 
               return (
-                <div key={key} className={`bg-card rounded-lg border transition-all ${isEditing ? "border-primary ring-1 ring-primary/20 shadow-md" : "border-border shadow-sm hover:border-primary/30"}`}>
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2 gap-4">
-                      <div className="flex-1">
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{key}</span>
+                <div key={key} className={`glass-card transition-all ${isEditing ? "border-primary ring-2 ring-primary/20 shadow-glow-primary" : "border-white/5 hover:border-white/20"}`}>
+                  <div className="p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-white/20 uppercase tracking-[0.2em]">{key}</span>
+                          {isEditing && <Badge variant="secondary" className="bg-primary/20 text-primary text-[9px] h-4">עורך כרגע</Badge>}
+                        </div>
                         {isEditing ? (
                           <textarea
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="w-full mt-1 p-2 rounded border border-border bg-input text-[hsl(222,39%,11%)] font-assistant text-sm min-h-[60px] focus-double-ring transition-all duration-150 resize-y"
+                            className="w-full mt-1 p-4 rounded-xl border border-white/10 bg-black/40 text-white font-assistant text-base min-h-[100px] focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-150 resize-y outline-none"
                             placeholder="הזן טקסט..."
                           />
                         ) : (
-                          <p className="font-assistant text-card-foreground mt-1">{content[key] || <span className="text-muted-foreground italic">(ריק)</span>}</p>
+                          <div className="font-assistant text-white/90 text-lg leading-relaxed break-words whitespace-pre-wrap">
+                            {content[key] || <span className="text-white/20 italic">(ריק)</span>}
+                          </div>
                         )}
                       </div>
                       <div className="flex gap-2">
@@ -129,12 +138,12 @@ export const ContentManagement = () => {
 
                     {/* Expanded Content Styles */}
                     {(isExpanded || isEditing) && (
-                      <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2">
+                      <div className="mt-8 pt-8 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-10 animate-fade-in">
                         {/* Font Size & Alignment */}
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           <div>
-                            <label className="text-xs font-rubik font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                              <Type className="w-3 h-3" /> גודל טקסט
+                            <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <Type className="w-4 h-4 text-primary" /> גודל טקסט וסגנון
                             </label>
                             <div className="flex flex-wrap gap-2">
                               {FONT_SIZES.map((fs) => (
@@ -142,11 +151,11 @@ export const ContentManagement = () => {
                                   key={fs.value}
                                   disabled={!isEditing}
                                   onClick={() => setEditProps({ ...editProps, fontSize: fs.value })}
-                                  className={`px-2 py-1 text-[10px] rounded border transition-all ${
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg border transition-all ${
                                     props.fontSize === fs.value 
-                                      ? "bg-primary text-primary-foreground border-primary" 
-                                      : "bg-secondary/50 text-muted-foreground border-transparent hover:border-border"
-                                  } ${!isEditing && "opacity-60 cursor-default"}`}
+                                      ? "bg-primary border-primary text-white shadow-glow-primary scale-105" 
+                                      : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:border-white/10"
+                                  } ${!isEditing && "opacity-40 cursor-default"}`}
                                 >
                                   {fs.label}
                                 </button>
@@ -155,8 +164,8 @@ export const ContentManagement = () => {
                           </div>
 
                           <div>
-                            <label className="text-xs font-rubik font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                              <AlignCenter className="w-3 h-3" /> יישור טקסט
+                            <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <AlignCenter className="w-4 h-4 text-primary" /> יישור טקסט
                             </label>
                             <div className="flex gap-2">
                               {ALIGNMENTS.map((align) => (
@@ -164,14 +173,14 @@ export const ContentManagement = () => {
                                   key={align.value}
                                   disabled={!isEditing}
                                   onClick={() => setEditProps({ ...editProps, alignment: align.value })}
-                                  className={`p-2 rounded border transition-all ${
+                                  className={`p-3 rounded-xl border transition-all ${
                                     props.alignment === align.value 
-                                      ? "bg-primary text-primary-foreground border-primary" 
-                                      : "bg-secondary/50 text-muted-foreground border-transparent hover:border-border"
-                                  } ${!isEditing && "opacity-60 cursor-default"}`}
+                                      ? "bg-primary border-primary text-white shadow-glow-primary scale-105" 
+                                      : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:border-white/10"
+                                  } ${!isEditing && "opacity-40 cursor-default"}`}
                                   title={align.label}
                                 >
-                                  <align.icon className="w-4 h-4" />
+                                  <align.icon className="w-5 h-5" />
                                 </button>
                               ))}
                             </div>
@@ -179,49 +188,49 @@ export const ContentManagement = () => {
                         </div>
 
                         {/* Margins & Icon */}
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-2 gap-6">
                             <div>
-                              <label className="text-xs font-rubik font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                                <ArrowUp className="w-3 h-3" /> מרווח עליון (Margin Top)
+                              <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <ArrowUp className="w-4 h-4 text-primary" /> מרווח עליון
                               </label>
                               <select 
                                 disabled={!isEditing}
                                 value={props.marginTop || ""}
                                 onChange={(e) => setEditProps({ ...editProps, marginTop: e.target.value })}
-                                className="w-full text-[10px] p-1 rounded border border-border bg-input text-[hsl(222,39%,11%)] focus-double-ring"
+                                className="w-full h-12 px-4 rounded-xl border border-white/10 bg-white/5 text-white font-assistant text-sm focus:bg-white/10 focus:border-primary/50 transition-all outline-none appearance-none cursor-pointer"
                               >
-                                <option value="">ללא</option>
-                                <option value="mt-1">מינימלי (4px)</option>
-                                <option value="mt-2">קטן (8px)</option>
-                                <option value="mt-4">בינוני (16px)</option>
-                                <option value="mt-8">גדול (32px)</option>
-                                <option value="mt-12">גדול מאוד (48px)</option>
+                                <option value="" className="bg-card">ללא</option>
+                                <option value="mt-1" className="bg-card">מינימלי (4px)</option>
+                                <option value="mt-2" className="bg-card">קטן (8px)</option>
+                                <option value="mt-4" className="bg-card">בינוני (16px)</option>
+                                <option value="mt-8" className="bg-card">גדול (32px)</option>
+                                <option value="mt-12" className="bg-card">גדול מאוד (48px)</option>
                               </select>
                             </div>
                             <div>
-                              <label className="text-xs font-rubik font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                                <ArrowDown className="w-3 h-3" /> מרווח תחתון (Margin Bottom)
+                              <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <ArrowDown className="w-4 h-4 text-primary" /> מרווח תחתון
                               </label>
                               <select 
                                 disabled={!isEditing}
                                 value={props.marginBottom || ""}
                                 onChange={(e) => setEditProps({ ...editProps, marginBottom: e.target.value })}
-                                className="w-full text-[10px] p-1 rounded border border-border bg-input text-[hsl(222,39%,11%)] focus-double-ring"
+                                className="w-full h-12 px-4 rounded-xl border border-white/10 bg-white/5 text-white font-assistant text-sm focus:bg-white/10 focus:border-primary/50 transition-all outline-none appearance-none cursor-pointer"
                               >
-                                <option value="">ללא</option>
-                                <option value="mb-1">מינימלי (4px)</option>
-                                <option value="mb-2">קטן (8px)</option>
-                                <option value="mb-4">בינוני (16px)</option>
-                                <option value="mb-8">גדול (32px)</option>
-                                <option value="mb-12">גדול מאוד (48px)</option>
+                                <option value="" className="bg-card">ללא</option>
+                                <option value="mb-1" className="bg-card">מינימלי (4px)</option>
+                                <option value="mb-2" className="bg-card">קטן (8px)</option>
+                                <option value="mb-4" className="bg-card">בינוני (16px)</option>
+                                <option value="mb-8" className="bg-card">גדול (32px)</option>
+                                <option value="mb-12" className="bg-card">גדול מאוד (48px)</option>
                               </select>
                             </div>
                           </div>
 
                           <div>
-                            <label className="text-xs font-rubik font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                              <ImageIcon className="w-3 h-3" /> אייקון (Lucide Icon Name)
+                            <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <ImageIcon className="w-4 h-4 text-primary" /> שם אייקון (Lucide)
                             </label>
                             <input 
                               disabled={!isEditing}
@@ -229,9 +238,9 @@ export const ContentManagement = () => {
                               value={props.icon || ""}
                               onChange={(e) => setEditProps({ ...editProps, icon: e.target.value })}
                               placeholder="למשל: Send, User, Settings..."
-                              className="w-full text-xs p-2 rounded border border-border bg-input text-[hsl(222,39%,11%)] font-mono focus-double-ring"
+                              className="w-full h-12 px-4 rounded-xl border border-white/10 bg-white/5 text-white font-mono text-sm focus:bg-white/10 focus:border-primary/50 transition-all outline-none"
                             />
-                            <p className="text-[9px] text-muted-foreground mt-1">השתמש בשמות מ-Lucide (למשל CheckCircle, Search)</p>
+                            <p className="text-[10px] text-white/20 mt-2 font-assistant tracking-wide">השתמש בשמות מ-Lucide (למשל CheckCircle, Search)</p>
                           </div>
                         </div>
                       </div>

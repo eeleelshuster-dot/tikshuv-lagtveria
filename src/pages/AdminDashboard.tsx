@@ -329,162 +329,141 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <Tabs defaultValue="tickets" className="space-y-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <TabsList className="bg-white/5 border border-white/10 p-1.5 rounded-2xl h-16 w-full md:w-auto backdrop-blur-md">
-              <TabsTrigger value="tickets" className="px-10 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-glow-primary transition-all font-rubik font-bold text-base">
-                <LucideIcons.Ticket className="w-5 h-5 ml-3" />
-                ניהול פניות
-              </TabsTrigger>
-              <TabsTrigger value="users" className="px-10 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-glow-primary transition-all font-rubik font-bold text-base">
-                <LucideIcons.Users className="w-5 h-5 ml-3" />
-                ניהול משתמשים
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Contextual Primary Action could go here */}
+        {/* Main Content Area */}
+        <div className="space-y-10 animate-slide-up">
+          {/* Operational Metrics */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { label: content["admin_dashboard_metric_new"] || 'פניות חדשות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent', bg: 'bg-status-sent/10' },
+              { label: content["admin_dashboard_metric_active"] || 'בטיפול שוטף', count: tickets.filter(t => t.status === 'in_progress').length, icon: LucideIcons.Activity, color: 'text-status-progress', bg: 'bg-status-progress/10' },
+              { label: content["admin_dashboard_metric_pending"] || 'ממתינות לסגירה', count: tickets.filter(t => t.status === 'closed' && !t.is_closed_confirmed).length, icon: LucideIcons.AlertCircle, color: 'text-accent-gold', bg: 'bg-accent-gold/10' },
+              { label: content["admin_dashboard_metric_archived"] || 'בארכיון המערכת', count: tickets.filter(t => t.is_archived).length, icon: LucideIcons.Archive, color: 'text-white/40', bg: 'bg-white/5' },
+            ].map((stat, i) => (
+              <div key={i} className="glass-card p-6 flex items-center gap-6 group hover:border-primary/30 transition-all">
+                <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-3xl font-bold font-mono tracking-tight text-white block leading-none">{stat.count}</span>
+                  <span className="text-xs text-white/40 font-assistant font-bold uppercase tracking-wider">{stat.label}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <TabsContent value="tickets" className="space-y-8 animate-slide-up">
-            {/* Operational Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { label: 'פניות חדשות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent', bg: 'bg-status-sent/10' },
-                { label: 'בטיפול שוטף', count: tickets.filter(t => t.status === 'in_progress').length, icon: LucideIcons.Activity, color: 'text-status-progress', bg: 'bg-status-progress/10' },
-                { label: 'ממתינות לסגירה', count: tickets.filter(t => t.status === 'closed' && !t.is_closed_confirmed).length, icon: LucideIcons.AlertCircle, color: 'text-accent-gold', bg: 'bg-accent-gold/10' },
-                { label: 'בארכיון המערכת', count: tickets.filter(t => t.is_archived).length, icon: LucideIcons.Archive, color: 'text-white/40', bg: 'bg-white/5' },
-              ].map((stat, i) => (
-                <div key={i} className="glass-card p-6 flex items-center gap-6 group hover:border-primary/30 transition-all">
-                  <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                    <stat.icon className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-3xl font-bold font-mono tracking-tight text-white block leading-none">{stat.count}</span>
-                    <span className="text-xs text-white/40 font-assistant font-bold uppercase tracking-wider">{stat.label}</span>
-                  </div>
-                </div>
-              ))}
+          <FilterPanel 
+            searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+            statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+            departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
+            dateFilter={dateFilter} setDateFilter={setDateFilter}
+            onClearFilters={clearFilters}
+            showArchived={showArchive}
+            setShowArchived={setShowArchive}
+          />
+
+          {/* Ticket Management Table */}
+          {loading ? (
+            <div className="glass-card p-24 text-center">
+              <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6" />
+              <p className="text-white/30 font-assistant text-xl animate-pulse">מסנכרן נתוני מערכת...</p>
             </div>
-
-            <FilterPanel 
-              searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-              departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter}
-              dateFilter={dateFilter} setDateFilter={setDateFilter}
-              onClearFilters={clearFilters}
-              showArchived={showArchive}
-              setShowArchived={setShowArchive}
-            />
-
-            {/* Ticket Management Table */}
-            {loading ? (
-              <div className="glass-card p-24 text-center">
-                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6" />
-                <p className="text-white/30 font-assistant text-xl animate-pulse">מסנכרן נתוני מערכת...</p>
-              </div>
-            ) : (
-              <div className="glass-card overflow-hidden border-white/5 shadow-2xl">
-                <table className="w-full text-right border-collapse">
-                  <thead>
-                    <tr className="bg-white/5 border-b border-white/10">
-                      <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">זיהוי פנייה</th>
-                      <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">פונה ומדור</th>
-                      <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">סטטוס טיפול</th>
-                      <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">גורם משויך</th>
-                      <th className="p-6"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {filtered.map((ticket) => (
-                      <tr key={ticket.id} className={`group hover:bg-white/[0.02] transition-colors ${updatingTicketId === ticket.id ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <td className="p-6">
-                          <div className="flex flex-col gap-1">
-                            <span 
-                              className="font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg w-fit cursor-pointer hover:shadow-glow-primary transition-all"
-                              onClick={() => openTicketDetail(ticket)}
-                            >
-                              {ticket.ticket_number}
-                            </span>
-                            <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">{formatDate(ticket.created_at)}</span>
-                          </div>
-                        </td>
-                        <td className="p-6">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-white text-base">{ticket.full_name}</span>
-                            <span className="text-xs text-white/40 font-assistant">{ticket.department || "ללא שיוך מדורי"}</span>
-                          </div>
-                        </td>
-                        <td className="p-6">
-                          <Select 
-                            value={ticket.status} 
-                            onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
-                          >
-                            <SelectTrigger className="h-11 w-[160px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
+          ) : (
+            <div className="glass-card overflow-hidden border-white/5 shadow-2xl">
+              <table className="w-full text-right border-collapse">
+                <thead>
+                  <tr className="bg-white/5 border-b border-white/10">
+                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_id"] || "זיהוי פנייה"}</th>
+                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_user_dept"] || "פונה ומדור"}</th>
+                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_status_change"] || "סטטוס טיפול"}</th>
+                    <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_technician_assign"] || "גורם משויך"}</th>
+                    <th className="p-6"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filtered.map((ticket) => (
+                    <tr 
+                      key={ticket.id} 
+                      onClick={() => openTicketDetail(ticket)}
+                      className={`group hover:bg-white/[0.04] transition-all cursor-pointer ${updatingTicketId === ticket.id ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      <td className="p-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg w-fit group-hover:shadow-glow-primary transition-all">
+                            {ticket.ticket_number}
+                          </span>
+                          <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">{formatDate(ticket.created_at)}</span>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-white text-base">{ticket.full_name}</span>
+                          <span className="text-xs text-white/40 font-assistant">{ticket.department || "ללא שיוך מדורי"}</span>
+                        </div>
+                      </td>
+                      <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                        <Select 
+                          value={ticket.status} 
+                          onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
+                        >
+                          <SelectTrigger className="h-11 w-[160px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card border-white/10 rounded-xl">
+                            <SelectItem value="sent" className="font-bold text-status-sent focus:bg-status-sent/10">נשלח</SelectItem>
+                            <SelectItem value="in_progress" className="font-bold text-status-progress focus:bg-status-progress/10">בטיפול המדור</SelectItem>
+                            <SelectItem value="forwarded" className="font-bold text-accent-gold focus:bg-accent-gold/10">הועבר לגורם אחר</SelectItem>
+                            <SelectItem value="resolved" className="font-bold text-status-resolved focus:bg-status-resolved/10">טופל במלואו</SelectItem>
+                            <SelectItem value="closed" className="font-bold text-white/40 focus:bg-white/5">סגור / ארכיון</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                        <Select 
+                          value={ticket.assignee_id || "none"} 
+                          onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
+                        >
+                          <SelectTrigger className="h-11 w-[180px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
+                            <div className="flex items-center gap-2">
+                              <LucideIcons.UserCheck className="w-3.5 h-3.5 text-primary/60" />
                               <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-card border-white/10 rounded-xl">
-                              <SelectItem value="sent" className="font-bold text-status-sent focus:bg-status-sent/10">נשלח</SelectItem>
-                              <SelectItem value="in_progress" className="font-bold text-status-progress focus:bg-status-progress/10">בטיפול המדור</SelectItem>
-                              <SelectItem value="forwarded" className="font-bold text-accent-gold focus:bg-accent-gold/10">הועבר לגורם אחר</SelectItem>
-                              <SelectItem value="resolved" className="font-bold text-status-resolved focus:bg-status-resolved/10">טופל במלואו</SelectItem>
-                              <SelectItem value="closed" className="font-bold text-white/40 focus:bg-white/5">סגור / ארכיון</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="p-6">
-                          <Select 
-                            value={ticket.assignee_id || "none"} 
-                            onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
-                          >
-                            <SelectTrigger className="h-11 w-[180px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
-                              <div className="flex items-center gap-2">
-                                <LucideIcons.UserCheck className="w-3.5 h-3.5 text-primary/60" />
-                                <SelectValue />
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent className="bg-card border-white/10 rounded-xl">
-                              <SelectItem value="none" className="italic text-white/40">ללא גורם משויך</SelectItem>
-                              {staffList.map((s) => (
-                                <SelectItem key={s.id} value={s.id} className="font-bold">{s.full_name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="p-6 text-left">
-                          <Button variant="ghost" size="icon" onClick={() => openTicketDetail(ticket)} className="rounded-xl hover:bg-primary/20 text-white/20 hover:text-primary transition-all">
-                            <LucideIcons.ExternalLink className="w-5 h-5" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filtered.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="p-24 text-center">
-                          <LucideIcons.DatabaseBackup className="w-16 h-16 text-white/5 mx-auto mb-6" />
-                          <p className="text-white/30 font-assistant text-xl italic">לא נמצאו פניות תואמות במערכת</p>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="users" className="animate-in fade-in slide-in-from-left-6">
-            <div className="glass-card p-10 border-white/5">
-              <div className="flex items-center justify-between mb-10">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-bold font-rubik text-white">ניהול צוות המדור</h2>
-                  <p className="text-white/40 font-assistant">הגדרת משתמשים, הרשאות גישה וסטטוס פעילות</p>
-                </div>
-                {/* User management primary action could be here */}
-              </div>
-              <UserManagement session={null} />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent className="bg-card border-white/10 rounded-xl">
+                            <SelectItem value="none" className="italic text-white/40">ללא גורם משויך</SelectItem>
+                            {staffList.map((s) => (
+                              <SelectItem key={s.id} value={s.id} className="font-bold">{s.full_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="p-6 text-left">
+                        <LucideIcons.ChevronLeft className="w-5 h-5 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-[-4px]" />
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-24 text-center">
+                        <LucideIcons.DatabaseBackup className="w-16 h-16 text-white/5 mx-auto mb-6" />
+                        <p className="text-white/30 font-assistant text-xl italic">{content["admin_dashboard_no_tickets"] || "לא נמצאו פניות תואמות במערכת"}</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
+
+        {/* Footer Navigation Anchor */}
+        <div className="flex justify-center pt-10 border-t border-white/5">
+          <Button asChild variant="ghost" className="text-white/20 hover:text-white transition-all rounded-xl">
+            <Link to="/" className="flex items-center gap-2">
+              <LucideIcons.ArrowRight className="w-4 h-4" />
+              <span>חזרה לדף הבית</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Enhanced Ticket Detail Sheet */}
