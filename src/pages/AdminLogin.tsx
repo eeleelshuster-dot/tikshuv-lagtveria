@@ -46,6 +46,8 @@ const AdminLogin = () => {
         navigate("/creator", { replace: true });
       } else if (profile.role === "admin") {
         navigate("/admin", { replace: true });
+      } else if (profile.role === "commander") {
+        navigate("/commander", { replace: true });
       } else {
         navigate("/", { replace: true });
       }
