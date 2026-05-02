@@ -178,8 +178,19 @@ export const FilterPanel = ({
       {/* Mobile Filter Modal */}
       {isMobileFilterOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-background/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsMobileFilterOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-white/10 rounded-t-[2.5rem] max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-full duration-500 ease-out">
+          <div 
+            className="absolute inset-0 bg-background/90 backdrop-blur-md animate-in fade-in duration-300" 
+            onClick={(e) => {
+              console.log("[FilterPanel] Backdrop Clicked. Source:", e.target);
+              setIsMobileFilterOpen(false);
+            }} 
+          />
+          <div 
+            className="absolute bottom-0 left-0 right-0 bg-card border-t border-white/10 rounded-t-[2.5rem] max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-full duration-500 ease-out"
+            onClick={(e) => {
+              console.log("[FilterPanel] Modal Content Clicked (propagation check)");
+            }}
+          >
             <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-card/80 backdrop-blur-xl z-10">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -240,12 +251,16 @@ export const FilterPanel = ({
                 <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em] px-1">תאריך פתיחה</label>
                 <Popover 
                   open={isCalendarOpen} 
-                  onOpenChange={setIsCalendarOpen}
+                  onOpenChange={(open) => {
+                    console.log("[FilterPanel] Popover onOpenChange ->", open);
+                    setIsCalendarOpen(open);
+                  }}
                 >
                   <PopoverTrigger asChild>
                     <Button 
                       variant="outline" 
                       className={`w-full h-14 justify-between font-bold font-assistant rounded-xl border-white/10 bg-white/5 ${!dateFilter && "text-white/30"}`}
+                      onClick={() => console.log("[FilterPanel] Calendar Trigger Clicked")}
                     >
                       <span>{dateFilter ? format(dateFilter, "PPP", { locale: he }) : "בחר תאריך יעד"}</span>
                       <CalendarIcon className="h-5 w-5 text-primary opacity-80" />
@@ -254,6 +269,12 @@ export const FilterPanel = ({
                   <PopoverContent 
                     className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[9999]" 
                     align="center"
+                    onPointerDownOutside={(e) => {
+                      console.log("[FilterPanel] Popover PointerDownOutside detected!");
+                    }}
+                    onInteractOutside={(e) => {
+                      console.log("[FilterPanel] Popover InteractOutside detected! Target:", e.target);
+                    }}
                   >
                     <Calendar
                       mode="single"
