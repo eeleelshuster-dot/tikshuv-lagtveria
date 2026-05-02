@@ -8,12 +8,15 @@ import { ContentManagement } from "@/components/creator/ContentManagement";
 import { useContent } from "@/contexts/ContentContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const CreatorPanel = () => {
   const { session } = useAuth();
   const { content, refreshContent } = useContent();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"users" | "content" | "import">("users");
+  
+  console.log("[CreatorPanel] Rendered, activeTab:", activeTab);
 
   const handleExport = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
@@ -78,7 +81,7 @@ const CreatorPanel = () => {
         </div>
 
         {/* Custom Tabs Navigation */}
-        <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-3 p-2 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md w-full sm:w-fit">
+        <div className="relative z-20 grid grid-cols-1 sm:flex sm:flex-wrap gap-3 p-2 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md w-full sm:w-fit">
           {[
             { id: 'users', label: 'ניהול משתמשים', icon: LucideIcons.Users },
             { id: 'content', label: 'ניהול תוכן (CMS)', icon: LucideIcons.Settings },
@@ -86,8 +89,11 @@ const CreatorPanel = () => {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center justify-center sm:justify-start gap-3 px-6 py-4 rounded-xl font-rubik font-bold text-sm transition-all ${
+              onClick={() => {
+                console.log("[CreatorPanel] Tab clicked:", tab.id, "currentRole:", session?.user?.role);
+                setActiveTab(tab.id as any);
+              }}
+              className={`flex items-center justify-center sm:justify-start gap-3 px-6 py-4 rounded-xl font-rubik font-bold text-sm transition-all pointer-events-auto ${
                 activeTab === tab.id 
                 ? "bg-primary text-white shadow-glow-primary" 
                 : "text-white/40 hover:text-white hover:bg-white/5"
@@ -108,8 +114,10 @@ const CreatorPanel = () => {
           )}
           
           {activeTab === "content" && (
-            <div className="glass-card p-8 border-white/5">
-              <ContentManagement />
+            <div className="glass-card p-8 border-white/5 min-h-[400px]">
+              <ErrorBoundary fallbackMessage="שגיאה בטעינת ממשק ניהול התוכן. נסה לרענן את הדף.">
+                <ContentManagement />
+              </ErrorBoundary>
             </div>
           )}
 

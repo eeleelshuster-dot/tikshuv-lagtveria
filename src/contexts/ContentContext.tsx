@@ -117,11 +117,13 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const refreshContent = async () => {
+    console.log("[ContentContext] Refreshing content...");
     try {
       const { data, error } = await (supabase.from("app_content" as any) as any).select("key, value_published, placement_rules");
       if (error) {
-        console.warn("Could not load dynamic content. Falling back to defaults.", error);
+        console.warn("[ContentContext] Could not load dynamic content. Falling back to defaults.", error);
       } else if (data) {
+        console.log("[ContentContext] Content loaded successfully, keys:", data.length);
         const remoteContent = { ...defaultContent };
         const remoteProps = { ...defaultProps };
         (data as any[]).forEach(item => {
@@ -134,7 +136,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         setContentProps(remoteProps);
       }
     } catch (err) {
-      console.warn("Failed to catch content:", err);
+      console.warn("[ContentContext] Failed to fetch content:", err);
     } finally {
       setLoading(false);
     }

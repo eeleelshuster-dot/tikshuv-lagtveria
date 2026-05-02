@@ -29,6 +29,8 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     return <Navigate to="/change-password" replace />;
   }
 
+  console.log("[ProtectedRoute] Checking access for role:", profile?.role, "requiredRole:", requiredRole);
+
   if (requiredRole && profile.role !== requiredRole && profile.role !== "creator") {
     return <Navigate to="/admin" replace />;
   }

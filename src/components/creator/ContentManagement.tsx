@@ -38,6 +38,12 @@ export const ContentManagement = () => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   
+  useState(() => {
+    console.log("[ContentManagement] Initializing/Mounting...");
+  });
+
+  console.log("[ContentManagement] Rendering...");
+  
   // Local state for the item being edited
   const [editValue, setEditValue] = useState("");
   const [editProps, setEditProps] = useState<ContentProperties>({});
