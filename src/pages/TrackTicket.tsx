@@ -114,7 +114,12 @@ const TrackTicket = () => {
         day: "2-digit", 
         month: "2-digit", 
         year: "numeric", 
-        hour: "2-digit",   return (
+        hour: "2-digit", 
+        minute: "2-digit" 
+    });
+  };
+
+  return (
     <div className="bg-gradient-main min-h-screen px-4 py-12 flex items-center justify-center">
       <div className="relative z-10 w-full max-w-2xl animate-fade-in space-y-10">
         <div className="text-center space-y-3">
@@ -247,16 +252,6 @@ const TrackTicket = () => {
           <Button asChild variant="ghost" className="text-white/30 hover:text-white rounded-xl">
             <Link to="/" className="flex items-center gap-2">
               <LucideIcons.ArrowRight className="w-4 h-4" />
-              {content["btn_back_home"]}
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};>
-            <Link to="/">
-              <LucideIcons.ArrowRight className="ml-2" />
               {content["btn_back_home"]}
             </Link>
           </Button>

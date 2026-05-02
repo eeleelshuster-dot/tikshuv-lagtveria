@@ -82,6 +82,7 @@ export default {
         'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'premium-hover': '0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 8px 12px -4px rgba(0, 0, 0, 0.1)',
         'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+        'glow-primary': '0 0 20px -5px hsla(191, 100%, 42%, 0.4)',
       },
       keyframes: {
         "accordion-down": {

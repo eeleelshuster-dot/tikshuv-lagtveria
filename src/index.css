@@ -84,11 +84,19 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
     direction: rtl;
     min-height: 100vh;
     letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    @apply bg-primary/30;
+  }
+
+  .focus-double-ring {
+    @apply focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background outline-none transition-all;
   }
 
   /* Refined Typography Hierarchy */

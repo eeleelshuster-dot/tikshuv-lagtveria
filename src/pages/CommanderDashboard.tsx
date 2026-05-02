@@ -352,7 +352,8 @@ const CommanderDashboard = () => {
                         </Badge>
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
 
               {filtered.length === 0 && (
