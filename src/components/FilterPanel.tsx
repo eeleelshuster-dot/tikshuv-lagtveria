@@ -21,6 +21,38 @@ interface FilterPanelProps {
   onClearFilters?: () => void;
 }
 
+const MobileDatePicker = ({ date, onSelect }: { date: Date | undefined, onSelect: (date: Date | undefined) => void }) => {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="outline" 
+          className={`w-full h-14 justify-between font-bold font-assistant rounded-xl border-white/10 bg-white/5 ${!date && "text-white/30"}`}
+        >
+          <span>{date ? format(date, "PPP", { locale: he }) : "בחר תאריך יעד"}</span>
+          <CalendarIcon className="h-5 w-5 text-primary opacity-80" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[9999]" 
+        align="center"
+      >
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(d) => { 
+            onSelect(d); 
+            setOpen(false); 
+          }}
+          locale={he}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const STATUS_OPTIONS = [
   { id: 'all', label: 'הכל' },
   { id: 'sent', label: 'נשלח' },
@@ -243,37 +275,7 @@ export const FilterPanel = ({
               {/* Date Section */}
               <div className="space-y-4">
                 <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em] px-1">תאריך פתיחה</label>
-                <Popover 
-                  open={isCalendarOpen} 
-                  onOpenChange={(open) => {
-                    console.log("[FilterPanel] Popover onOpenChange ->", open);
-                    setIsCalendarOpen(open);
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className={`w-full h-14 justify-between font-bold font-assistant rounded-xl border-white/10 bg-white/5 ${!dateFilter && "text-white/30"}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>{dateFilter ? format(dateFilter, "PPP", { locale: he }) : "בחר תאריך יעד"}</span>
-                      <CalendarIcon className="h-5 w-5 text-primary opacity-80" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    className="w-screen max-w-[calc(100vw-2rem)] p-0 bg-card border-white/10 rounded-2xl overflow-hidden z-[9999]" 
-                    align="center"
-                    onPointerDownOutside={(e) => e.preventDefault()}
-                    onInteractOutside={(e) => e.preventDefault()}
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={dateFilter}
-                      onSelect={(date) => { setDateFilter(date); setIsCalendarOpen(false); }}
-                      locale={he}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <MobileDatePicker date={dateFilter} onSelect={setDateFilter} />
               </div>
             </div>
 
