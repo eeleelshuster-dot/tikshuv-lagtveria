@@ -14,6 +14,7 @@ import CommanderDashboard from "./pages/CommanderDashboard";
 import CreatorPanel from "./pages/CreatorPanel";
 import ChangePassword from "./pages/ChangePassword";
 import NotFound from "./pages/NotFound";
+import DebugPage from "./pages/DebugPage";
 import { ContentProvider } from "@/contexts/ContentContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -49,6 +50,7 @@ const App = () => (
                     <CreatorPanel />
                   </ProtectedRoute>
                 } />
+                <Route path="/debug" element={<DebugPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
