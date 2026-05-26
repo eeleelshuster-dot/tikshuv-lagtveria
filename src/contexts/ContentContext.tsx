@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 export interface ContentProperties {
   fontSize?: string;
@@ -95,6 +96,9 @@ const defaultContent: Record<string, string> = {
 
 const defaultProps: Record<string, ContentProperties> = {};
 
+const CACHE_KEY_CONTENT = "app_content_cache";
+const CACHE_KEY_PROPS = "app_content_props_cache";
+
 interface ContentContextType {
   content: Record<string, string>;
   getContentProps: (key: string) => ContentProperties;
@@ -112,9 +116,32 @@ export const useContent = () => {
 };
 
 export const ContentProvider = ({ children }: { children: ReactNode }) => {
-  const [content, setContent] = useState<Record<string, string>>(defaultContent);
-  const [contentProps, setContentProps] = useState<Record<string, ContentProperties>>(defaultProps);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<Record<string, string>>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_CONTENT);
+      return cached ? JSON.parse(cached) : defaultContent;
+    } catch {
+      return defaultContent;
+    }
+  });
+
+  const [contentProps, setContentProps] = useState<Record<string, ContentProperties>>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_PROPS);
+      return cached ? JSON.parse(cached) : defaultProps;
+    } catch {
+      return defaultProps;
+    }
+  });
+
+  const [loading, setLoading] = useState(() => {
+    try {
+      // If we have cached content, we don't need to block UI rendering
+      return !localStorage.getItem(CACHE_KEY_CONTENT);
+    } catch {
+      return true;
+    }
+  });
 
   const refreshContent = async () => {
     try {
@@ -130,8 +157,24 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
             remoteProps[item.key] = item.placement_rules as ContentProperties;
           }
         });
-        setContent(remoteContent);
-        setContentProps(remoteProps);
+
+        // Prevent unnecessary state updates if cached data is identical to database data
+        const currentContentStr = JSON.stringify(content);
+        const remoteContentStr = JSON.stringify(remoteContent);
+        const currentPropsStr = JSON.stringify(contentProps);
+        const remotePropsStr = JSON.stringify(remoteProps);
+
+        if (currentContentStr !== remoteContentStr || currentPropsStr !== remotePropsStr) {
+          setContent(remoteContent);
+          setContentProps(remoteProps);
+          
+          try {
+            localStorage.setItem(CACHE_KEY_CONTENT, remoteContentStr);
+            localStorage.setItem(CACHE_KEY_PROPS, remotePropsStr);
+          } catch (e) {
+            console.warn("[ContentContext] Failed to cache content:", e);
+          }
+        }
       }
     } catch (err) {
       console.warn("[ContentContext] Failed to fetch content:", err);
@@ -148,10 +191,27 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     const previousValue = content[key];
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Optimistic update
-    setContent(prev => ({ ...prev, [key]: value }));
+    // Optimistic state and cache updates
+    setContent(prev => {
+      const updated = { ...prev, [key]: value };
+      try {
+        localStorage.setItem(CACHE_KEY_CONTENT, JSON.stringify(updated));
+      } catch (e) {
+        console.warn("[ContentContext] Failed to cache updated content:", e);
+      }
+      return updated;
+    });
+
     if (props) {
-      setContentProps(prev => ({ ...prev, [key]: props }));
+      setContentProps(prev => {
+        const updated = { ...prev, [key]: props };
+        try {
+          localStorage.setItem(CACHE_KEY_PROPS, JSON.stringify(updated));
+        } catch (e) {
+          console.warn("[ContentContext] Failed to cache updated props:", e);
+        }
+        return updated;
+      });
     }
     
     try {
@@ -183,7 +243,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ContentContext.Provider value={{ content, getContentProps, loading, refreshContent, updateContent }}>
-      {children}
+      {loading ? <LoadingScreen /> : children}
     </ContentContext.Provider>
   );
 };
