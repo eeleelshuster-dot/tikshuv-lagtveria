@@ -306,46 +306,46 @@ const AdminDashboard = () => {
   const formatDate = (iso: string) => new Date(iso).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
-      <div className="max-w-7xl mx-auto space-y-10 animate-fade-in">
+    <div className="page-shell">
+      <div className="page-content">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold font-rubik text-white tracking-tight flex items-center gap-3">
-              <LucideIcons.ShieldAlert className="w-10 h-10 text-primary shadow-glow-primary" />
+        <div className="page-header">
+          <div className="space-y-1">
+            <h1 className="text-3xl sm:text-4xl font-bold font-rubik text-white tracking-tight flex items-center gap-3">
+              <LucideIcons.ShieldAlert className="icon-2xl text-primary shadow-glow-primary" />
               מרכז ניהול מערכת
             </h1>
-            <p className="text-white/40 font-assistant text-xl">בקרה תפעולית, ניהול משאבים והרשאות</p>
+            <p className="text-white/40 font-assistant text-lg">בקרה תפעולית, ניהול משאבים והרשאות</p>
           </div>
-          <div className="flex items-center gap-4 bg-white/5 p-3 pr-8 rounded-3xl border border-white/10 backdrop-blur-xl">
+          <div className="user-badge">
             <div className="text-right">
               <span className="text-[10px] text-primary font-bold uppercase tracking-widest block">ADMINISTRATOR</span>
               <span className="text-base font-bold text-white font-assistant">{profile?.full_name || "מנהל מערכת"}</span>
             </div>
-            <div className="h-10 w-px bg-white/10 mx-2" />
-            <Button variant="ghost" size="icon" onClick={signOut} className="text-white/30 hover:text-white hover:bg-destructive/20 rounded-2xl w-12 h-12 transition-all">
-              <LucideIcons.LogOut className="w-6 h-6" />
+            <div className="h-8 w-px bg-white/10" />
+            <Button variant="ghost" size="icon" onClick={signOut} className="text-white/30 hover:text-white hover:bg-destructive/20 rounded-2xl w-10 h-10 transition-all">
+              <LucideIcons.LogOut className="icon-md" />
             </Button>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="space-y-10 animate-slide-up">
+        <div className="space-y-8 animate-slide-up">
           {/* Operational Metrics */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               { label: content["admin_dashboard_metric_new"] || 'פניות חדשות', count: tickets.filter(t => t.status === 'sent').length, icon: LucideIcons.Inbox, color: 'text-status-sent', bg: 'bg-status-sent/10' },
               { label: content["admin_dashboard_metric_active"] || 'בטיפול שוטף', count: tickets.filter(t => t.status === 'in_progress').length, icon: LucideIcons.Activity, color: 'text-status-progress', bg: 'bg-status-progress/10' },
               { label: content["admin_dashboard_metric_pending"] || 'ממתינות לסגירה', count: tickets.filter(t => t.status === 'closed' && !t.is_closed_confirmed).length, icon: LucideIcons.AlertCircle, color: 'text-accent-gold', bg: 'bg-accent-gold/10' },
               { label: content["admin_dashboard_metric_archived"] || 'בארכיון המערכת', count: tickets.filter(t => t.is_archived).length, icon: LucideIcons.Archive, color: 'text-white/40', bg: 'bg-white/5' },
             ].map((stat, i) => (
-              <div key={i} className="glass-card p-6 flex items-center gap-6 group hover:border-primary/30 transition-all">
-                <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                  <stat.icon className="w-8 h-8" />
+              <div key={i} className="metric-card">
+                <div className={`metric-icon-wrap ${stat.bg} ${stat.color}`}>
+                  <stat.icon className="icon-xl" />
                 </div>
-                <div className="space-y-1">
-                  <span className="text-3xl font-bold font-mono tracking-tight text-white block leading-none">{stat.count}</span>
-                  <span className="text-xs text-white/40 font-assistant font-bold uppercase tracking-wider">{stat.label}</span>
+                <div className="metric-card-body">
+                  <span className="metric-count">{stat.count}</span>
+                  <span className="metric-label">{stat.label}</span>
                 </div>
               </div>
             ))}
@@ -374,11 +374,11 @@ const AdminDashboard = () => {
                   <table className="w-full text-right border-collapse">
                     <thead>
                       <tr className="bg-white/5 border-b border-white/10">
-                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_id"] || "זיהוי פנייה"}</th>
-                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_user_dept"] || "פונה ומדור"}</th>
-                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_status_change"] || "סטטוס טיפול"}</th>
-                        <th className="p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em]">{content["label_technician_assign"] || "גורם משויך"}</th>
-                        <th className="p-6"></th>
+                        <th className="th-cell">{content["label_id"] || "זיהוי פנייה"}</th>
+                        <th className="th-cell">{content["label_user_dept"] || "פונה ומדור"}</th>
+                        <th className="th-cell">{content["label_status_change"] || "סטטוס טיפול"}</th>
+                        <th className="th-cell">{content["label_technician_assign"] || "גורם משויך"}</th>
+                        <th className="th-cell"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -388,7 +388,7 @@ const AdminDashboard = () => {
                           onClick={() => openTicketDetail(ticket)}
                           className={`group hover:bg-white/[0.04] transition-all cursor-pointer ${updatingTicketId === ticket.id ? 'opacity-50 pointer-events-none' : ''}`}
                         >
-                          <td className="p-6">
+                          <td className="td-cell">
                             <div className="flex flex-col gap-1">
                               <span className="font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg w-fit group-hover:shadow-glow-primary transition-all">
                                 {ticket.ticket_number}
@@ -396,13 +396,13 @@ const AdminDashboard = () => {
                               <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">{formatDate(ticket.created_at)}</span>
                             </div>
                           </td>
-                          <td className="p-6">
-                            <div className="flex flex-col">
+                          <td className="td-cell">
+                            <div className="flex flex-col gap-0.5">
                               <span className="font-bold text-white text-base">{ticket.full_name}</span>
                               <span className="text-xs text-white/40 font-assistant">{ticket.department || "ללא שיוך מדורי"}</span>
                             </div>
                           </td>
-                          <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                          <td className="td-cell" onClick={(e) => e.stopPropagation()}>
                             <Select 
                               value={ticket.status} 
                               onValueChange={(val) => handleStatusChange(ticket.id, val as TicketStatus)}
@@ -419,14 +419,14 @@ const AdminDashboard = () => {
                               </SelectContent>
                             </Select>
                           </td>
-                          <td className="p-6" onClick={(e) => e.stopPropagation()}>
+                          <td className="td-cell" onClick={(e) => e.stopPropagation()}>
                             <Select 
                               value={ticket.assignee_id || "none"} 
                               onValueChange={(val) => handleAssigneeChange(ticket.id, val)}
                             >
                               <SelectTrigger className="h-11 w-[180px] bg-white/5 border-white/10 rounded-xl font-assistant text-xs font-bold text-white/80 focus:ring-primary/20">
                                 <div className="flex items-center gap-2">
-                                  <LucideIcons.UserCheck className="w-3.5 h-3.5 text-primary/60" />
+                                  <LucideIcons.UserCheck className="icon-xs text-primary/60" />
                                   <SelectValue />
                                 </div>
                               </SelectTrigger>
@@ -438,8 +438,8 @@ const AdminDashboard = () => {
                               </SelectContent>
                             </Select>
                           </td>
-                          <td className="p-6 text-left">
-                            <LucideIcons.ChevronLeft className="w-5 h-5 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-[-4px]" />
+                          <td className="td-cell">
+                            <LucideIcons.ChevronLeft className="icon-md text-white/10 group-hover:text-primary transition-all group-hover:translate-x-[-4px]" />
                           </td>
                         </tr>
                       ))}
@@ -458,10 +458,10 @@ const AdminDashboard = () => {
         </div>
 
         {/* Footer Navigation Anchor */}
-        <div className="flex justify-center pt-10 border-t border-white/5">
+        <div className="footer-nav">
           <Button asChild variant="ghost" className="text-white/20 hover:text-white transition-all rounded-xl">
             <Link to="/" className="flex items-center gap-2">
-              <LucideIcons.ArrowRight className="w-4 h-4" />
+              <LucideIcons.ArrowRight className="icon-sm" />
               <span>חזרה לדף הבית</span>
             </Link>
           </Button>
@@ -570,7 +570,7 @@ const AdminDashboard = () => {
                         onClick={handleAddNote}
                         disabled={savingNote || !newNote.trim()}
                       >
-                        {savingNote ? <LucideIcons.Loader2 className="w-6 h-6 animate-spin" /> : <LucideIcons.Save className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />}
+                        {savingNote ? <LucideIcons.Loader2 className="icon-lg animate-spin" /> : <LucideIcons.Save className="icon-md group-hover:scale-110 transition-transform" />}
                         {savingNote ? "מעדכן יומן..." : "שמור עדכון ביומן הטיפול"}
                       </Button>
                     </div>

@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────────── */
 @layer base {
   :root {
-    /* New Palette: #192571, #1a2866, #2835a3, #000066, #4f1f8e */
     --background: 232 64% 10%;
     --foreground: 0 0% 100%;
 
@@ -14,7 +16,6 @@
     --popover: 232 64% 12%;
     --popover-foreground: 0 0% 100%;
 
-    /* Primary Accent: #3596B5 */
     --primary: 194 55% 46%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 194 55% 52%;
@@ -26,7 +27,7 @@
     --muted: 232 45% 15%;
     --muted-foreground: 232 15% 70%;
 
-    --accent: 265 65% 34%; /* From #4f1f8e */
+    --accent: 265 65% 34%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -34,38 +35,46 @@
 
     --border: 232 30% 25%;
     --input: 232 64% 10%;
+    --input-text: 0 0% 100%;
     --ring: 194 55% 46%;
 
     --radius: 0.75rem;
     --radius-card: 1.5rem;
 
-    /* Status System */
+    /* Status colours */
     --status-sent: 35 100% 55%;
     --status-in-progress: 200 100% 55%;
     --status-resolved: 145 75% 45%;
     --status-closed: 232 15% 55%;
 
-    /* Enhanced Shadows */
-    --shadow-premium: 0 20px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(0, 0, 0, 0.2);
-    --shadow-glow-primary: 0 0 25px -5px hsla(194, 55%, 46%, 0.4);
+    /* Accent gold (used for "waiting" states) */
+    --accent-gold: 40 95% 55%;
+
+    /* Shadows */
+    --shadow-premium: 0 20px 50px -12px rgba(0,0,0,.5), 0 0 15px -3px rgba(0,0,0,.2);
+    --shadow-glow-primary: 0 0 25px -5px hsla(194,55%,46%,.4);
+    --shadow-inner-soft: inset 0 2px 12px rgba(0,0,0,.25);
   }
 }
 
+/* ─────────────────────────────────────────────
+   BASE RESETS & GLOBAL
+───────────────────────────────────────────── */
 @layer base {
   * {
-    @apply border-border outline-none;
+    @apply border-border outline-none box-border;
   }
 
   body {
-    @apply text-foreground antialiased selection:bg-primary/30;
+    @apply text-foreground antialiased;
     font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
     direction: rtl;
     min-height: 100vh;
     overflow-x: hidden;
     background: #192571;
-    background-image: 
-      radial-gradient(at 0% 0%, #1a2866 0, transparent 50%),
-      radial-gradient(at 50% 0%, #2835a3 0, transparent 50%),
+    background-image:
+      radial-gradient(at 0% 0%,   #1a2866 0, transparent 50%),
+      radial-gradient(at 50% 0%,  #2835a3 0, transparent 50%),
       radial-gradient(at 100% 0%, #000066 0, transparent 50%),
       radial-gradient(at 0% 100%, #4f1f8e 0, transparent 50%),
       radial-gradient(at 100% 100%, #192571 0, transparent 50%);
@@ -73,111 +82,223 @@
     background-size: cover;
   }
 
-  h1 { @apply text-4xl sm:text-5xl font-bold tracking-tight mb-8 text-white font-rubik; }
-  h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight mb-6 text-white/90 font-rubik; }
-  h3 { @apply text-xl font-medium mb-4 text-white/80 font-rubik; }
+  /* Headings — no hardcoded margins; parent spacing handles rhythm */
+  h1 { @apply text-4xl sm:text-5xl font-bold tracking-tight text-white font-rubik leading-tight; }
+  h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight text-white/90 font-rubik leading-snug; }
+  h3 { @apply text-xl font-medium text-white/80 font-rubik leading-snug; }
 
-  /* RTL Input & Label alignment */
+  /* RTL form controls */
   input, textarea, select {
     @apply text-right;
     direction: rtl;
   }
-
   label {
     @apply text-right block w-full;
   }
+
+  /* Global focus ring — consistent across all interactive elements */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary/40 ring-offset-1 ring-offset-transparent;
+  }
 }
 
+/* ─────────────────────────────────────────────
+   COMPONENT CLASSES
+───────────────────────────────────────────── */
 @layer components {
+
+  /* ── Surfaces ── */
   .bg-gradient-main {
     @apply relative min-h-screen w-full;
-    /* Removed background-image from here to avoid layering conflicts with body */
   }
 
   .glass-card {
-    @apply bg-card/40 backdrop-blur-3xl border border-white/10 shadow-premium rounded-[var(--radius-card)] transition-all duration-300;
+    @apply bg-card/40 backdrop-blur-3xl border border-white/10 rounded-[var(--radius-card)] transition-all duration-300;
+    box-shadow: var(--shadow-premium);
   }
 
   .glass-input {
-    @apply bg-white/5 border border-white/10 rounded-xl px-5 h-14 text-white placeholder:text-white/30 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-200 outline-none w-full text-right;
+    @apply bg-white/5 border border-white/10 rounded-xl px-5 h-14 text-white
+           placeholder:text-white/30 focus:bg-white/10 focus:border-primary/50
+           focus:ring-4 focus:ring-primary/10 transition-all duration-200
+           outline-none w-full text-right;
     direction: rtl;
   }
 
-  /* Button System */
+  /* ── Icon system ── */
+  /* Use these classes for ALL icons instead of ad-hoc w-X h-X */
+  .icon-xs  { @apply w-3.5 h-3.5 shrink-0; }   /* 14px – error dots, tiny badges  */
+  .icon-sm  { @apply w-4   h-4   shrink-0; }   /* 16px – inline labels, breadcrumbs */
+  .icon-md  { @apply w-5   h-5   shrink-0; }   /* 20px – form field icons, button secondary */
+  .icon-lg  { @apply w-6   h-6   shrink-0; }   /* 24px – CTA button icons          */
+  .icon-xl  { @apply w-8   h-8   shrink-0; }   /* 32px – stat cards                */
+  .icon-2xl { @apply w-10  h-10  shrink-0; }   /* 40px – hero icons, page headers  */
+
+  /* RTL-safe icon + text row */
+  .icon-row { @apply flex items-center gap-2; }
+
+  /* ── Page layout shells ── */
+  /* All dashboard pages */
+  .page-shell {
+    @apply bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10;
+  }
+
+  /* All centered single-column pages (login, forms) */
+  .page-center {
+    @apply bg-gradient-main min-h-screen flex items-center justify-center px-4 py-12;
+  }
+
+  /* Inner max-width wrapper for dashboards */
+  .page-content {
+    @apply max-w-7xl mx-auto space-y-8 animate-fade-in;
+  }
+
+  /* Narrow form container (login, change-password) */
+  .form-wrapper {
+    @apply w-full max-w-md animate-fade-in space-y-8;
+  }
+
+  /* Medium form container (open-ticket, track-ticket) */
+  .form-wrapper-lg {
+    @apply w-full max-w-xl animate-fade-in space-y-8;
+  }
+
+  /* ── Page-level header row ── */
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-6;
+  }
+
+  /* User identity badge (top-right of dashboards) */
+  .user-badge {
+    @apply flex items-center gap-3 bg-white/5 px-4 py-3 rounded-3xl border border-white/10 backdrop-blur-xl shrink-0;
+  }
+
+  /* ── Metric stat cards ── */
+  /* Horizontal card: icon left, text right (all dashboards unified) */
+  .metric-card {
+    @apply glass-card p-5 sm:p-6 flex items-center gap-5 group hover:border-primary/30 transition-all;
+  }
+
+  .metric-icon-wrap {
+    @apply p-3 sm:p-4 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform;
+  }
+
+  .metric-count {
+    @apply text-3xl font-bold font-mono tracking-tight text-white block leading-none;
+  }
+
+  .metric-label {
+    @apply text-[11px] text-white/40 font-assistant font-bold uppercase tracking-wider block mt-0.5;
+  }
+
+  /* ── Table cells (shared) ── */
+  .th-cell {
+    @apply p-4 lg:p-6 font-bold text-white/30 text-[11px] uppercase tracking-[0.2em] text-right;
+  }
+  .td-cell {
+    @apply p-4 lg:p-6 text-right;
+  }
+
+  /* ── Timeline / log entries ── */
+  .timeline-entry {
+    @apply relative pr-10 animate-fade-in group;
+  }
+  .timeline-dot {
+    @apply absolute right-0 top-1.5 w-6 h-6 rounded-full bg-card border-2 border-primary/20
+           flex items-center justify-center transition-all group-hover:border-primary/40;
+  }
+
+  /* ── Form field standard ── */
+  .field-label {
+    @apply text-xs font-bold text-white/40 uppercase tracking-widest block px-1;
+  }
+  .field-error {
+    @apply text-destructive text-xs font-bold flex items-center gap-1.5 px-1 mt-1;
+  }
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-primary text-white font-bold rounded-xl px-8 py-4 shadow-glow-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 text-lg;
+    @apply bg-primary text-white font-bold rounded-xl px-8 py-4 hover:bg-primary-hover
+           active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 text-lg;
+    box-shadow: var(--shadow-glow-primary);
   }
 
   .btn-secondary {
-    @apply bg-white/5 text-white font-medium rounded-xl px-8 py-4 border border-white/10 hover:bg-white/10 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 text-lg;
+    @apply bg-white/5 text-white font-medium rounded-xl px-8 py-4 border border-white/10
+           hover:bg-white/10 active:scale-[0.98] transition-all duration-200
+           flex items-center justify-center gap-3 text-lg;
   }
 
   .btn-disabled {
     @apply bg-muted text-muted-foreground cursor-not-allowed opacity-50;
   }
 
-  /* Sticky Footer Back Button */
+  /* ── Sheet / drawer header label ── */
+  .sheet-label {
+    @apply text-[10px] font-bold text-primary uppercase tracking-[0.4em] block;
+  }
+
+  /* ── Section footer (back button row) ── */
   .footer-nav {
-    @apply mt-20 pt-10 border-t border-white/5 flex flex-col items-center gap-6 pb-12;
+    @apply flex justify-center pt-10 border-t border-white/5;
   }
 
-  /* Consistency Helpers */
-  .section-spacing {
-    @apply py-16 px-4 sm:px-6 lg:px-12;
+  /* ── Scrollbar (custom, thin) ── */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.1) transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
   }
 
-  .card-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
-  }
+  /* ── Shadow utility ── */
+  .shadow-glow-primary { box-shadow: var(--shadow-glow-primary); }
+  .shadow-premium      { box-shadow: var(--shadow-premium); }
+  .shadow-inner-soft   { box-shadow: var(--shadow-inner-soft); }
 }
 
+/* ─────────────────────────────────────────────
+   UTILITY ANIMATIONS
+───────────────────────────────────────────── */
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+  .animate-fade-in    { animation: fadeIn    0.6s cubic-bezier(.16,1,.3,1) both; }
+  .animate-slide-up   { animation: slideUp   0.7s cubic-bezier(.16,1,.3,1) both; }
+  .animate-pulse-soft { animation: pulseSoft 2s   ease-in-out infinite; }
+  .animate-shake      { animation: shake     0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulseSoft {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
   }
 
-  .rtl-flip {
-    transform: scaleX(-1);
-  }
+  .rtl-flip { transform: scaleX(-1); }
 
-  /* Input Wrapping & Clipping Fixes */
-  .input-wrap {
-    @apply break-words whitespace-pre-wrap overflow-hidden;
-    max-width: 100%;
-  }
-
-  .content-editable-input {
-    @apply bg-white/10 text-white p-3 rounded-lg border border-white/20 focus:border-primary w-full transition-colors;
-    min-height: 2.5rem;
-  }
+  /* Safe area for mobile bottom sheets */
+  .safe-bottom { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
 }
 
-::selection {
-  @apply bg-primary/30 text-white;
-}
+/* ─────────────────────────────────────────────
+   GLOBAL SCROLLBAR
+───────────────────────────────────────────── */
+::selection { @apply bg-primary/30 text-white; }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
-}
-
-
+::-webkit-scrollbar        { width: 8px; }
+::-webkit-scrollbar-track  { background: rgba(255,255,255,.02); }
+::-webkit-scrollbar-thumb  { @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors; }
