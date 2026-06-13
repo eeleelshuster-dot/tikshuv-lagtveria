@@ -176,11 +176,15 @@
   /* ── Metric stat cards ── */
   /* Horizontal card: icon left, text right (all dashboards unified) */
   .metric-card {
-    @apply glass-card p-5 sm:p-6 flex items-center gap-5 group hover:border-primary/30 transition-all;
+    @apply glass-card p-5 sm:p-6 flex items-center gap-5 hover:border-primary/30 transition-all;
   }
 
   .metric-icon-wrap {
-    @apply p-3 sm:p-4 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform;
+    @apply p-3 sm:p-4 rounded-2xl flex items-center justify-center shrink-0 transition-transform;
+  }
+
+  .metric-card:hover .metric-icon-wrap {
+    transform: scale(1.1);
   }
 
   .metric-count {
@@ -201,11 +205,14 @@
 
   /* ── Timeline / log entries ── */
   .timeline-entry {
-    @apply relative pr-10 animate-fade-in group;
+    @apply relative pr-10 animate-fade-in;
   }
   .timeline-dot {
     @apply absolute right-0 top-1.5 w-6 h-6 rounded-full bg-card border-2 border-primary/20
-           flex items-center justify-center transition-all group-hover:border-primary/40;
+           flex items-center justify-center transition-all;
+  }
+  .timeline-entry:hover .timeline-dot {
+    @apply border-primary/40;
   }
 
   /* ── Form field standard ── */
