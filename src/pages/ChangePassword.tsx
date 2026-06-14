@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import * as LucideIcons from "lucide-react";
+import { Lock, CheckCircle2 } from "lucide-react";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LucideIcons: Record<string, any> = { Lock, CheckCircle2 };
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useContent } from "@/contexts/ContentContext";
@@ -65,7 +67,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4">
+    <main className="bg-gradient-main min-h-screen flex items-center justify-center px-4">
       <div className="relative z-10 w-full max-w-md animate-fade-in">
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
@@ -122,7 +124,7 @@ const ChangePassword = () => {
           </Button>
         </form>
       </div>
-    </div>
+    </main>
   );
 };
 

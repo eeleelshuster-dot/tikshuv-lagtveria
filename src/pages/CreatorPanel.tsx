@@ -59,7 +59,7 @@ const CreatorPanel = () => {
   };
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
+    <main className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-6xl mx-auto space-y-10 animate-fade-in">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -173,7 +173,7 @@ const CreatorPanel = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

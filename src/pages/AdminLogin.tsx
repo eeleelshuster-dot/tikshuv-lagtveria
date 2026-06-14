@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import * as LucideIcons from "lucide-react";
+import {
+  ShieldAlert, ShieldCheck, User, Key, Check, AlertTriangle, Loader2, ArrowRight,
+} from "lucide-react";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LucideIcons: Record<string, any> = {
+  ShieldAlert, ShieldCheck, User, Key, Check, AlertTriangle, Loader2, ArrowRight,
+};
 import { useAuth } from "@/contexts/AuthContext";
 import PasswordInput from "@/components/PasswordInput";
 import { useContent } from "@/contexts/ContentContext";
@@ -101,7 +107,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="page-center">
+    <main className="page-center">
       <div className="relative z-10 form-wrapper">
         {/* Hero Icon + Title */}
         <div className="text-center space-y-4">
@@ -199,7 +205,7 @@ const AdminLogin = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

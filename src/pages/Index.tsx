@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import * as LucideIcons from "lucide-react";
+import {
+  ShieldCheck,
+  Plus,
+  Search,
+  ChevronLeft,
+  Lock,
+  Settings,
+} from "lucide-react";
 import { useContent } from "@/contexts/ContentContext";
 import { useAuth } from "@/contexts/AuthContext";
+
+// Allowlist of CMS-configurable icons — avoids bundling the entire lucide library
+const CMS_ICONS: Record<string, React.FC<{ className?: string }>> = {
+  Plus, Search, Lock, Settings, ShieldCheck,
+};
 
 const Index = () => {
   const { content, getContentProps } = useContent();
@@ -10,7 +22,7 @@ const Index = () => {
   // Returns icon component with consistent sizing — NO physical margin (gap handles spacing)
   const renderIcon = (iconName: string | undefined, fallback: React.ReactNode) => {
     if (!iconName) return fallback;
-    const IconComponent = (LucideIcons as any)[iconName];
+    const IconComponent = CMS_ICONS[iconName];
     return IconComponent ? <IconComponent className="icon-lg" /> : fallback;
   };
 
@@ -20,13 +32,13 @@ const Index = () => {
   };
 
   return (
-    <div className="page-center">
+    <main className="page-center">
       <div className="relative z-10 w-full max-w-2xl animate-fade-in space-y-10">
 
         {/* Hero */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest animate-slide-up">
-            <LucideIcons.ShieldCheck className="icon-sm" />
+            <ShieldCheck className="icon-sm" />
             מערכת ניהול פניות רשמית
           </div>
           <h1 className={`font-rubik font-bold text-white leading-tight tracking-tight drop-shadow-2xl ${getStyle("home_hero_title") || "text-4xl sm:text-6xl"}`}>
@@ -44,11 +56,11 @@ const Index = () => {
               <Link to="/open-ticket" className="flex items-center justify-between px-6">
                 <span className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                    {renderIcon(getContentProps("home_btn_open").icon, <LucideIcons.Plus className="icon-lg" />)}
+                    {renderIcon(getContentProps("home_btn_open").icon, <Plus className="icon-lg" />)}
                   </div>
                   {content["home_btn_open"]}
                 </span>
-                <LucideIcons.ChevronLeft className="icon-lg opacity-40 group-hover:translate-x-[-4px] transition-transform shrink-0" />
+                <ChevronLeft className="icon-lg opacity-40 group-hover:translate-x-[-4px] transition-transform shrink-0" />
               </Link>
             </Button>
 
@@ -56,11 +68,11 @@ const Index = () => {
               <Link to="/track-ticket" className="flex items-center justify-between px-6">
                 <span className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                    {renderIcon(getContentProps("home_btn_track").icon, <LucideIcons.Search className="icon-lg" />)}
+                    {renderIcon(getContentProps("home_btn_track").icon, <Search className="icon-lg" />)}
                   </div>
                   {content["home_btn_track"]}
                 </span>
-                <LucideIcons.ChevronLeft className="icon-lg opacity-40 group-hover:translate-x-[-4px] transition-transform shrink-0" />
+                <ChevronLeft className="icon-lg opacity-40 group-hover:translate-x-[-4px] transition-transform shrink-0" />
               </Link>
             </Button>
           </div>
@@ -70,7 +82,7 @@ const Index = () => {
         <div className="flex flex-col items-center gap-4">
           <Button asChild variant="ghost" className={`text-white/40 hover:text-white hover:bg-white/5 px-8 h-12 rounded-xl transition-all ${getStyle("home_link_admin")}`}>
             <Link to="/admin-login" className="flex items-center gap-2">
-              <LucideIcons.Lock className="icon-sm" />
+              <Lock className="icon-sm" />
               <span>כניסת סגל ומנהלים</span>
             </Link>
           </Button>
@@ -83,7 +95,7 @@ const Index = () => {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
@@ -94,7 +106,7 @@ const AuthLinkToCreator = () => {
   return (
     <Button asChild variant="heroOutline" size="xl" className="w-full border-primary/40 text-primary hover:bg-primary/10">
       <Link to="/creator" className="flex items-center justify-center gap-2">
-        <LucideIcons.Settings className="icon-sm" />
+        <Settings className="icon-sm" />
         <span>פאנל יוצר (מנהל על)</span>
       </Link>
     </Button>

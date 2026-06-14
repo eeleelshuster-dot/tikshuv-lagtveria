@@ -1,7 +1,15 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import * as LucideIcons from "lucide-react";
+import {
+  Send, Copy, ArrowRight, User, CheckCircle2, AlertCircle,
+  Building2, ChevronDown, Phone, MessageSquare, ShieldCheck, AlertTriangle,
+} from "lucide-react";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LucideIcons: Record<string, any> = {
+  Send, Copy, ArrowRight, User, CheckCircle2, AlertCircle,
+  Building2, ChevronDown, Phone, MessageSquare, ShieldCheck, AlertTriangle,
+};
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useContent } from "@/contexts/ContentContext";
@@ -185,7 +193,7 @@ const OpenTicket = () => {
 
   if (submitted) {
     return (
-      <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-12">
+      <main className="bg-gradient-main min-h-screen flex items-center justify-center px-4 py-12">
         <div className="relative z-10 w-full max-w-md animate-fade-in text-center space-y-8">
           <div className="glass-card p-10 border-white/10 shadow-2xl space-y-6">
             <div className="w-20 h-20 bg-primary/20 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-glow-primary animate-pulse">
@@ -230,12 +238,12 @@ const OpenTicket = () => {
             </Link>
           </Button>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-12 flex items-center justify-center">
+    <main className="bg-gradient-main min-h-screen px-4 py-12 flex items-center justify-center">
       <div className="relative z-10 w-full max-w-xl animate-fade-in space-y-8">
         <div className="text-center space-y-3">
           <h1 className="text-4xl sm:text-5xl font-rubik font-bold text-white tracking-tight">
@@ -387,7 +395,7 @@ const OpenTicket = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import * as LucideIcons from "lucide-react";
+import {
+  Hash, Loader2, Search, AlertCircle, Activity, Calendar,
+  History, CheckCircle2, ArrowRight, SearchX,
+} from "lucide-react";
+// Named re-export map so JSX can use the LucideIcons.X pattern during migration
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LucideIcons: Record<string, any> = {
+  Hash, Loader2, Search, AlertCircle, Activity, Calendar,
+  History, CheckCircle2, ArrowRight, SearchX,
+};
 import { supabase } from "@/integrations/supabase/client";
 import { useContent } from "@/contexts/ContentContext";
 import { StatusBadge, TicketTimeline } from "@/components/TicketUI";
@@ -73,7 +82,7 @@ const TrackTicket = () => {
   };
 
   return (
-    <div className="page-center">
+    <main className="page-center">
       <div className="relative z-10 form-wrapper-lg">
 
         {/* Hero */}
@@ -206,7 +215,7 @@ const TrackTicket = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

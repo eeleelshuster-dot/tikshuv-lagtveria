@@ -181,7 +181,7 @@ const CommanderDashboard = () => {
   const formatDate = (iso: string) => new Date(iso).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
+    <main className="bg-gradient-main min-h-screen px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-7xl mx-auto space-y-10 animate-fade-in">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
@@ -484,7 +484,7 @@ const CommanderDashboard = () => {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+    </main>
   );
 };
 

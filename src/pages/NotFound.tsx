@@ -18,7 +18,7 @@ const NotFound = () => {
   };
 
   return (
-    <div className="bg-gradient-main min-h-screen flex items-center justify-center px-4">
+    <main className="bg-gradient-main min-h-screen flex items-center justify-center px-4">
       <div className="relative z-10 w-full max-w-md text-center animate-fade-in">
         <h1 className={`font-rubik font-bold text-foreground ${getStyle("not_found_title") || "text-6xl mb-4"}`}>
           {content["not_found_title"]}
@@ -33,7 +33,7 @@ const NotFound = () => {
           </Link>
         </Button>
       </div>
-    </div>
+    </main>
   );
 };
 

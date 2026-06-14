@@ -35,6 +35,8 @@ import { UserManagement } from "@/components/creator/UserManagement";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+type TicketStatus = "sent" | "in_progress" | "forwarded" | "resolved" | "closed";
+
 const statusLabels: Record<string, string> = {
   sent: "נשלח",
   in_progress: "בטיפול המדור",
@@ -306,7 +308,7 @@ const AdminDashboard = () => {
   const formatDate = (iso: string) => new Date(iso).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="page-shell">
+    <main className="page-shell">
       <div className="page-content">
         {/* Header Section */}
         <div className="page-header">
@@ -622,7 +624,7 @@ const AdminDashboard = () => {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+    </main>
   );
 };
 
